@@ -1,0 +1,6 @@
+{
+  "name": "Soma - Ugandan Primary Learning",
+  "description": "NCDC-aligned interactive gamified learning platform for Ugandan primary students (P1-P7) with offline sync, bite-sized lessons, PLE exam prep, and Spotify-style parent progress report cards.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

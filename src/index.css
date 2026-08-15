@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+}
+
+/* Custom 3D button press effects inspired by Duolingo tactile feel */
+.btn-3d-amber {
+  background-color: #f59e0b;
+  box-shadow: 0 4px 0 #b45309;
+  transition: all 0.08s ease-in-out;
+}
+.btn-3d-amber:hover {
+  background-color: #fbbf24;
+}
+.btn-3d-amber:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #b45309;
+}
+
+.btn-3d-emerald {
+  background-color: #10b981;
+  box-shadow: 0 4px 0 #047857;
+  transition: all 0.08s ease-in-out;
+}
+.btn-3d-emerald:hover {
+  background-color: #34d399;
+}
+.btn-3d-emerald:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #047857;
+}
+
+.btn-3d-slate {
+  background-color: #ffffff;
+  box-shadow: 0 4px 0 #cbd5e1;
+  transition: all 0.08s ease-in-out;
+}
+.btn-3d-slate:hover {
+  background-color: #f8fafc;
+}
+.btn-3d-slate:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #cbd5e1;
+}
+
+.btn-3d-indigo {
+  background-color: #6366f1;
+  box-shadow: 0 4px 0 #4338ca;
+  transition: all 0.08s ease-in-out;
+}
+.btn-3d-indigo:hover {
+  background-color: #818cf8;
+}
+.btn-3d-indigo:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #4338ca;
+}
+
+.btn-3d-rose {
+  background-color: #f43f5e;
+  box-shadow: 0 4px 0 #be123c;
+  transition: all 0.08s ease-in-out;
+}
+.btn-3d-rose:hover {
+  background-color: #fb7185;
+}
+.btn-3d-rose:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #be123c;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Print layout for Report Cards */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
