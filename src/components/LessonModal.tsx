@@ -2,17 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   LessonNode, 
   Question, 
-  MultipleChoiceQuestion, 
-  DragDropQuestion, 
-  SentenceUnscrambleQuestion, 
-  InteractiveDialQuestion, 
-  DiagramTapQuestion, 
+  TeachSlide,
   UserStats 
 } from '../types';
 import { 
   X, 
   Heart, 
-  Volume2, 
   Sparkles, 
   CheckCircle2, 
   AlertCircle, 
@@ -20,12 +15,17 @@ import {
   Bot, 
   Trophy, 
   RotateCcw,
-  Sun,
   Flame,
-  HelpCircle
+  HelpCircle,
+  BookOpen,
+  Check,
+  Lightbulb,
+  Compass,
+  MapPin,
+  Award
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { soundFx, speakAloud, stopSpeaking } from '../services/soundEffects';
+import { soundFx, speakAloud } from '../services/soundEffects';
 
 interface LessonModalProps {
   lesson: LessonNode;
@@ -40,24 +40,29 @@ export const LessonModal: React.FC<LessonModalProps> = ({
   onClose,
   onCompleteLesson,
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const teachSlides: TeachSlide[] = lesson.teachSlides || [];
+  const hasTeachPhase = teachSlides.length > 0;
 
-  // Drag & drop pairing state
+  // Phase: 'teach' -> 'practice' -> 'complete'
+  const [phase, setPhase] = useState<'teach' | 'practice' | 'complete'>(
+    hasTeachPhase ? 'teach' : 'practice'
+  );
+
+  // Teach phase state
+  const [teachSlideIndex, setTeachSlideIndex] = useState(0);
+  const [teachMicroSelected, setTeachMicroSelected] = useState<number | null>(null);
+  const [teachMicroChecked, setTeachMicroChecked] = useState(false);
+
+  // Practice phase state
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [matchedPairs, setMatchedPairs] = useState<Record<string, string>>({});
-
-  // Sentence unscramble state
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
   const [availableWords, setAvailableWords] = useState<string[]>([]);
-
-  // Interactive dial state
-  const [dialValue, setDialValue] = useState<number>(0);
-
-  // Diagram tap state
   const [tappedHotspotId, setTappedHotspotId] = useState<string | null>(null);
 
-  // Validation state
+  // Validation & Error tracking
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [mistakesCount, setMistakesCount] = useState(0);
@@ -67,12 +72,10 @@ export const LessonModal: React.FC<LessonModalProps> = ({
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [showHintModal, setShowHintModal] = useState(false);
 
-  // Finished state
-  const [isFinished, setIsFinished] = useState(false);
+  const currentQ: Question | undefined = lesson.questions[questionIndex];
+  const currentSlide: TeachSlide | undefined = teachSlides[teachSlideIndex];
 
-  const currentQ: Question = lesson.questions[currentIndex];
-
-  // Initialize question state whenever currentIndex changes
+  // Reset question state when questionIndex changes
   useEffect(() => {
     setIsAnswerChecked(false);
     setIsCorrect(false);
@@ -83,38 +86,47 @@ export const LessonModal: React.FC<LessonModalProps> = ({
     setAiHint(null);
     setShowHintModal(false);
 
-    if (currentQ.type === 'sentence_unscramble') {
+    if (currentQ && currentQ.type === 'sentence_unscramble') {
       setSelectedWords([]);
       setAvailableWords([...currentQ.scrambledWords]);
-    } else if (currentQ.type === 'interactive_dial') {
-      setDialValue(currentQ.initialValue);
     }
-  }, [currentIndex, currentQ]);
+  }, [questionIndex, currentQ]);
 
-  // Read aloud prompt when requested
-  const handleSpeak = (text: string) => {
+  // Reset micro check on teach slide change
+  useEffect(() => {
+    setTeachMicroSelected(null);
+    setTeachMicroChecked(false);
+  }, [teachSlideIndex]);
+
+  // -------------------------------------------------------------
+  // TEACH PHASE HANDLERS
+  // -------------------------------------------------------------
+  const handleNextTeachSlide = () => {
     soundFx.playClick();
-    speakAloud(text);
+    if (teachSlideIndex < teachSlides.length - 1) {
+      setTeachSlideIndex((prev) => prev + 1);
+    } else {
+      // Transition from Teach to Guided Practice
+      soundFx.playFanfare();
+      setPhase('practice');
+    }
   };
 
-  // Check Answer logic
+  // -------------------------------------------------------------
+  // PRACTICE PHASE HANDLERS
+  // -------------------------------------------------------------
   const handleCheckAnswer = () => {
+    if (!currentQ) return;
     let correct = false;
 
     if (currentQ.type === 'multiple_choice') {
       correct = selectedOptionId === currentQ.correctOptionId;
     } else if (currentQ.type === 'drag_drop_match') {
-      // Check if all pairs are correctly matched
-      const allMatched = currentQ.pairs.every(
-        (pair) => matchedPairs[pair.left] === pair.right
-      );
-      correct = allMatched;
+      correct = currentQ.pairs.every((pair) => matchedPairs[pair.left] === pair.right);
     } else if (currentQ.type === 'sentence_unscramble') {
       const studentSentence = selectedWords.join(' ').trim().toLowerCase();
       const targetSentence = currentQ.correctSentence.trim().toLowerCase();
       correct = studentSentence === targetSentence;
-    } else if (currentQ.type === 'interactive_dial') {
-      correct = Math.abs(dialValue - currentQ.targetValue) < 0.01;
     } else if (currentQ.type === 'diagram_tap') {
       correct = tappedHotspotId === currentQ.targetHotspotId;
     }
@@ -130,358 +142,458 @@ export const LessonModal: React.FC<LessonModalProps> = ({
     }
   };
 
-  // Continue to next question or finish
-  const handleContinue = () => {
+  const handleNextQuestion = () => {
     soundFx.playClick();
-    if (currentIndex < lesson.questions.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
+    if (questionIndex < lesson.questions.length - 1) {
+      setQuestionIndex((prev) => prev + 1);
     } else {
-      // Lesson Complete!
+      // Complete lesson!
       soundFx.playFanfare();
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
-      setIsFinished(true);
-      const calculatedScore = Math.max(
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      setPhase('complete');
+      const finalScore = Math.max(
         60,
         Math.round(((lesson.questions.length - mistakesCount) / lesson.questions.length) * 100)
       );
-      onCompleteLesson(lesson.id, calculatedScore, lesson.xpReward, lesson.gemsReward);
+      onCompleteLesson(lesson.id, finalScore, lesson.xpReward, lesson.gemsReward);
     }
   };
 
-  // Fetch AI Tutor Hint from server
-  const handleGetAiHint = async () => {
-    soundFx.playClick();
+  // Request AI Tutor hint
+  const handleAskAiHint = async () => {
+    if (!currentQ) return;
     setIsLoadingAi(true);
     setShowHintModal(true);
-
     try {
-      const res = await fetch('/api/ai/tutor-hint', {
+      const response = await fetch('/api/ask-kigozi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question: currentQ.prompt,
-          studentAnswer:
-            currentQ.type === 'multiple_choice'
-              ? (currentQ as MultipleChoiceQuestion).options.find((o) => o.id === selectedOptionId)?.text
-              : currentQ.type === 'interactive_dial'
-              ? `${dialValue} ${(currentQ as InteractiveDialQuestion).unit}`
-              : currentQ.type === 'sentence_unscramble'
-              ? selectedWords.join(' ')
-              : 'Unknown',
-          subject: lesson.subjectId,
-          gradeLevel: lesson.gradeLevel,
-          concept: currentQ.ncdcTopic,
+          question: `In P.7 SST: "${currentQ.prompt}". What Socratic hint helps the student understand?`,
+          gradeLevel: 'P.7',
+          subject: 'sst',
+          studentName: userStats.studentName,
         }),
       });
-
-      const data = await res.json();
-      if (data.success && data.text) {
-        setAiHint(data.text);
-      } else {
-        setAiHint(data.fallback || currentQ.explanation);
-      }
+      const data = await response.json();
+      setAiHint(data.reply || currentQ.explanation);
     } catch {
-      setAiHint(
-        `💡 Study Buddy Hint: ${currentQ.explanation.split('.')[0]}. Think about what the question is asking in real life!`
-      );
+      setAiHint(currentQ.explanation);
     } finally {
       setIsLoadingAi(false);
     }
   };
 
-  // Matching logic
-  const handleSelectLeft = (leftItem: string) => {
+  // Word unscramble toggle
+  const handleSelectWord = (word: string, index: number) => {
     soundFx.playClick();
-    setSelectedLeft(leftItem);
+    setSelectedWords([...selectedWords, word]);
+    const nextAvail = [...availableWords];
+    nextAvail.splice(index, 1);
+    setAvailableWords(nextAvail);
   };
 
-  const handleSelectRight = (rightItem: string) => {
+  const handleDeselectWord = (word: string, index: number) => {
+    soundFx.playClick();
+    const nextSelected = [...selectedWords];
+    nextSelected.splice(index, 1);
+    setSelectedWords(nextSelected);
+    setAvailableWords([...availableWords, word]);
+  };
+
+  // Drag drop matching
+  const handleSelectPairLeft = (leftText: string) => {
+    soundFx.playClick();
+    setSelectedLeft(leftText);
+  };
+
+  const handleSelectPairRight = (rightText: string) => {
     soundFx.playClick();
     if (selectedLeft) {
-      setMatchedPairs((prev) => ({
-        ...prev,
-        [selectedLeft]: rightItem,
-      }));
+      setMatchedPairs({
+        ...matchedPairs,
+        [selectedLeft]: rightText,
+      });
       setSelectedLeft(null);
     }
   };
 
-  // Sentence unscramble logic
-  const handleAddWord = (word: string, index: number) => {
-    soundFx.playClick();
-    setSelectedWords((prev) => [...prev, word]);
-    setAvailableWords((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleRemoveWord = (word: string, index: number) => {
-    soundFx.playClick();
-    setSelectedWords((prev) => prev.filter((_, i) => i !== index));
-    setAvailableWords((prev) => [...prev, word]);
-  };
-
-  const progressPercent = Math.round(((currentIndex + 1) / lesson.questions.length) * 100);
-
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex flex-col justify-between overflow-y-auto">
-      {/* Top Header Navigation */}
-      <div className="bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-          <button
-            id="lesson-close-btn"
-            onClick={() => {
-              stopSpeaking();
-              soundFx.playClick();
-              onClose();
-            }}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          {/* Progress Bar */}
-          <div className="flex-1 max-w-lg bg-slate-100 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-200">
-            <div
-              className="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
-            />
+  // -------------------------------------------------------------
+  // RENDER VISUAL SCHEMATICS FOR TEACH SLIDES
+  // -------------------------------------------------------------
+  const renderVisualSchematic = (type?: string) => {
+    if (type === 'rift_valley_diagram') {
+      return (
+        <div className="p-4 rounded-2xl bg-gradient-to-b from-sky-50 to-amber-50/50 border-2 border-slate-200">
+          <div className="flex items-center justify-between text-xs font-black text-slate-700 mb-2">
+            <span className="flex items-center gap-1.5">
+              <Compass className="w-4 h-4 text-blue-600" />
+              Cross-Section: Tectonic Faulting & Escarpments
+            </span>
+            <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+              Western Arm Graben
+            </span>
           </div>
 
-          {/* Hearts / Energy */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-600 font-extrabold text-sm">
+          <div className="h-28 relative flex items-end justify-between px-4 py-2 bg-white rounded-xl border border-slate-200">
+            {/* Left Plateau / Escarpment */}
+            <div className="w-1/4 h-20 bg-emerald-600 rounded-t-lg relative flex flex-col items-center justify-center text-white text-[10px] font-black shadow-xs">
+              <span>Plateau</span>
+              <span className="text-[8px] opacity-80">(Fort Portal)</span>
+            </div>
+            
+            {/* Fault Line Arrow */}
+            <div className="text-[10px] font-black text-rose-600 text-center animate-bounce">
+              <span>⬇ Fault</span>
+            </div>
+
+            {/* Sunken Valley Floor (Graben) with Lake */}
+            <div className="w-2/5 h-10 bg-blue-500 rounded-t-lg relative flex flex-col items-center justify-center text-white text-[10px] font-black shadow-xs">
+              <span>Rift Graben</span>
+              <span className="text-[8px] opacity-90">Lake Albert / Edward</span>
+            </div>
+
+            {/* Fault Line Arrow */}
+            <div className="text-[10px] font-black text-rose-600 text-center animate-bounce">
+              <span>⬇ Fault</span>
+            </div>
+
+            {/* Right Horst Mountain */}
+            <div className="w-1/4 h-24 bg-slate-700 rounded-t-lg relative flex flex-col items-center justify-center text-white text-[10px] font-black shadow-xs border-t-4 border-slate-100">
+              <span>Horst Block</span>
+              <span className="text-[8px] text-amber-300">Rwenzori (5,109m)</span>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-600 font-semibold mt-2 text-center">
+            Tensional forces pulled the crust outward, dropping the valley graben between parallel fault lines.
+          </p>
+        </div>
+      );
+    }
+
+    if (type === 'nile_drainage_map') {
+      return (
+        <div className="p-4 rounded-2xl bg-sky-50/70 border-2 border-sky-200">
+          <div className="flex items-center justify-between text-xs font-black text-sky-900 mb-2">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-sky-600" />
+              Nile River Flow Path (Jinja to Egypt)
+            </span>
+            <span className="text-[10px] bg-sky-200 text-sky-950 font-black px-2 py-0.5 rounded">
+              6,650 km Total
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-1.5 text-center text-[10px] font-black">
+            <div className="p-2 rounded-xl bg-white border border-sky-200 text-slate-900 shadow-2xs">
+              <span className="block text-sky-600 text-[9px]">1. Origin</span>
+              Lake Victoria (Jinja)
+            </div>
+            <div className="p-2 rounded-xl bg-white border border-sky-200 text-slate-900 shadow-2xs">
+              <span className="block text-sky-600 text-[9px]">2. Victoria Nile</span>
+              Kyoga & Karuma
+            </div>
+            <div className="p-2 rounded-xl bg-white border border-sky-200 text-slate-900 shadow-2xs">
+              <span className="block text-sky-600 text-[9px]">3. Albert Nile</span>
+              Pakwach to Nimule
+            </div>
+            <div className="p-2 rounded-xl bg-white border border-sky-200 text-slate-900 shadow-2xs">
+              <span className="block text-sky-600 text-[9px]">4. White Nile</span>
+              Khartoum to Delta
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (type === 'independence_flag') {
+      return (
+        <div className="p-4 rounded-2xl bg-slate-900 text-white border-2 border-slate-800 flex items-center gap-4">
+          <div className="w-24 h-16 rounded-xl overflow-hidden border-2 border-white/30 flex flex-col shrink-0 shadow-md">
+            <div className="h-1/3 bg-black flex items-center justify-center" />
+            <div className="h-1/3 bg-amber-400 flex items-center justify-center">
+              <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center text-[7px] text-slate-950 font-black">
+                🦩
+              </div>
+            </div>
+            <div className="h-1/3 bg-rose-600 flex items-center justify-center" />
+          </div>
+          <div className="text-xs space-y-0.5">
+            <p className="font-heading font-black text-amber-400 text-sm">
+              Sovereign Symbols of Uganda
+            </p>
+            <p className="text-[11px] text-slate-300">
+              <strong className="text-white">Black:</strong> African Heritage • <strong className="text-amber-300">Yellow:</strong> Tropical Sunshine • <strong className="text-rose-400">Red:</strong> Brotherhood.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border-2 border-slate-200 overflow-hidden flex flex-col my-auto max-h-[92vh]">
+        
+        {/* Top Header Bar */}
+        <div className="p-4 sm:p-5 border-b-2 border-slate-100 flex items-center justify-between bg-slate-50">
+          <div className="flex items-center gap-3 flex-1 pr-4">
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5 stroke-[2.5]" />
+            </button>
+
+            {/* Phase Badge */}
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
+                phase === 'teach' 
+                  ? 'bg-blue-100 text-blue-900 border border-blue-200' 
+                  : 'bg-emerald-100 text-emerald-900 border border-emerald-200'
+              }`}>
+                {phase === 'teach' ? 'Step 1: Teach & Learn' : phase === 'practice' ? 'Step 2: Guided Practice' : 'Mastery Achieved'}
+              </span>
+              <span className="font-heading font-bold text-xs sm:text-sm text-slate-900 truncate">
+                {lesson.title}
+              </span>
+            </div>
+          </div>
+
+          {/* Hearts counter */}
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-600 font-black text-xs">
             <Heart className="w-4 h-4 fill-rose-500" />
             <span>{userStats.hearts}</span>
           </div>
         </div>
-      </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 max-w-3xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
-        {isFinished ? (
-          /* Lesson Complete Celebration View */
-          <div className="bg-white rounded-3xl p-8 text-center shadow-xl border border-slate-200 space-y-6 animate-in fade-in zoom-in duration-300">
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-inner">
-              <Trophy className="w-12 h-12" />
+        {/* Progress Bar */}
+        <div className="w-full bg-slate-100 h-2">
+          {phase === 'teach' && (
+            <div
+              className="bg-blue-500 h-full transition-all duration-300"
+              style={{ width: `${((teachSlideIndex + 1) / Math.max(1, teachSlides.length)) * 100}%` }}
+            />
+          )}
+          {phase === 'practice' && (
+            <div
+              className="bg-emerald-500 h-full transition-all duration-300"
+              style={{ width: `${((questionIndex + 1) / Math.max(1, lesson.questions.length)) * 100}%` }}
+            />
+          )}
+          {phase === 'complete' && (
+            <div className="bg-emerald-500 h-full w-full" />
+          )}
+        </div>
+
+        {/* ========================================================= */}
+        {/* PHASE 1: TEACH & LEARN (CONCEPT FIRST) */}
+        {/* ========================================================= */}
+        {phase === 'teach' && currentSlide && (
+          <div className="p-5 sm:p-7 space-y-5 overflow-y-auto flex-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-blue-600 flex items-center gap-1">
+                <BookOpen className="w-3.5 h-3.5" />
+                Concept {teachSlideIndex + 1} of {teachSlides.length}
+              </span>
+              <span className="text-[11px] font-bold text-slate-400">
+                Primary 7 NCDC Social Studies
+              </span>
             </div>
 
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-                Lesson Completed!
-              </span>
-              <h2 className="font-heading font-black text-2xl sm:text-3xl text-slate-900 mt-2">
-                Oli Muzira! Excellent Job!
+              <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900 leading-tight">
+                {currentSlide.conceptHeading}
               </h2>
-              <p className="text-slate-600 text-sm mt-1">
-                You mastered <span className="font-bold text-slate-800">{lesson.title}</span>. Your projected PLE score is climbing!
+              <p className="text-xs sm:text-sm text-slate-700 mt-2 whitespace-pre-line leading-relaxed font-medium">
+                {currentSlide.body}
               </p>
             </div>
 
-            {/* Rewards Card */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-center">
-                <Sun className="w-6 h-6 text-amber-500 fill-amber-400 mx-auto mb-1" />
-                <span className="block text-xs font-bold text-slate-600">Enjuba Gems</span>
-                <span className="font-heading font-black text-xl text-amber-700">+{lesson.gemsReward}</span>
+            {/* Visual Schematic Diagram */}
+            {renderVisualSchematic(currentSlide.visualType)}
+
+            {/* Key Bullets */}
+            {currentSlide.bullets && currentSlide.bullets.length > 0 && (
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
+                  Core UNEB High-Frequency Facts:
+                </span>
+                <ul className="space-y-1.5 text-xs text-slate-800 font-semibold">
+                  {currentSlide.bullets.map((b, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0 stroke-[3]" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-center">
-                <Sparkles className="w-6 h-6 text-indigo-600 mx-auto mb-1" />
-                <span className="block text-xs font-bold text-slate-600">Total XP</span>
-                <span className="font-heading font-black text-xl text-indigo-700">+{lesson.xpReward}</span>
-              </div>
-              <div className="p-3.5 rounded-2xl bg-orange-50 border border-orange-200 text-center">
-                <Flame className="w-6 h-6 text-orange-500 fill-orange-500 mx-auto mb-1" />
-                <span className="block text-xs font-bold text-slate-600">Streak Active</span>
-                <span className="font-heading font-black text-xl text-orange-600">{userStats.currentStreak} Days</span>
+            )}
+
+            {/* PLE Exam Tip Box */}
+            <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-200 flex items-start gap-3">
+              <Lightbulb className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-[10px] font-black uppercase text-amber-900 tracking-wide block">
+                  PLE Distinction Exam Tip
+                </span>
+                <p className="text-xs text-amber-950 font-bold mt-0.5 leading-snug">
+                  {currentSlide.pleExamTip}
+                </p>
               </div>
             </div>
 
-            <button
-              id="lesson-finish-continue-btn"
-              onClick={() => {
-                soundFx.playClick();
-                onClose();
-              }}
-              className="w-full btn-3d-amber py-3.5 rounded-2xl text-white font-extrabold text-base shadow-md cursor-pointer flex items-center justify-center gap-2"
-            >
-              Continue Journey
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
-        ) : (
-          /* Active Question View */
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 space-y-6">
-            {/* Prompt Header */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-extrabold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
-                  {currentQ.ncdcTopic}
+            {/* Interactive Micro-Check (Ensure Retention) */}
+            {currentSlide.quickCheck && (
+              <div className="p-4 rounded-2xl bg-blue-50/70 border-2 border-blue-200 space-y-3">
+                <span className="text-[10px] font-black uppercase text-blue-800 tracking-wide block">
+                  Micro-Checkpoint: Test Your Understanding
                 </span>
-
-                <div className="flex items-center gap-2">
-                  {/* Read Aloud Button */}
-                  <button
-                    id="question-speak-btn"
-                    onClick={() => handleSpeak(currentQ.prompt)}
-                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
-                    title="Listen to question"
-                  >
-                    <Volume2 className="w-4 h-4" />
-                  </button>
-
-                  {/* Ask Kigozi AI Tutor Hint */}
-                  <button
-                    id="ask-kigozi-hint-btn"
-                    onClick={handleGetAiHint}
-                    className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold flex items-center gap-1 cursor-pointer"
-                  >
-                    <Bot className="w-3.5 h-3.5" />
-                    <span>Ask Kigozi</span>
-                  </button>
-                </div>
-              </div>
-
-              <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900 leading-snug">
-                {currentQ.prompt}
-              </h2>
-
-              {currentQ.subtext && (
-                <p className="text-xs sm:text-sm font-medium text-slate-500">
-                  {currentQ.subtext}
+                <p className="text-xs font-black text-slate-900">
+                  {currentSlide.quickCheck.prompt}
                 </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {currentSlide.quickCheck.options.map((opt, idx) => {
+                    const isSelected = teachMicroSelected === idx;
+                    const isCorrectOption = idx === currentSlide.quickCheck?.correctIndex;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          soundFx.playClick();
+                          setTeachMicroSelected(idx);
+                          setTeachMicroChecked(true);
+                          if (isCorrectOption) soundFx.playCorrect();
+                          else soundFx.playWrong();
+                        }}
+                        className={`p-3 rounded-xl border-2 text-left text-xs font-bold transition-all cursor-pointer ${
+                          !teachMicroChecked
+                            ? isSelected
+                              ? 'border-blue-500 bg-white shadow-xs text-blue-950'
+                              : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            : isCorrectOption
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-950'
+                            : isSelected
+                            ? 'border-rose-500 bg-rose-50 text-rose-950'
+                            : 'border-slate-200 bg-white text-slate-400'
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {teachMicroChecked && (
+                  <p className="text-[11px] font-bold text-slate-700 bg-white p-2 rounded-lg border border-slate-200">
+                    💡 {currentSlide.quickCheck.explanation}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* PHASE 2: GUIDED INTERACTIVE PRACTICE */}
+        {/* ========================================================= */}
+        {phase === 'practice' && currentQ && (
+          <div className="p-5 sm:p-7 space-y-5 overflow-y-auto flex-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-600">
+                Exercise {questionIndex + 1} of {lesson.questions.length} • {currentQ.ncdcTopic}
+              </span>
+              <button
+                onClick={handleAskAiHint}
+                className="text-xs font-black text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-3 py-1 rounded-xl flex items-center gap-1.5 cursor-pointer"
+              >
+                <Bot className="w-3.5 h-3.5" />
+                Ask Kigozi Hint
+              </button>
+            </div>
+
+            {/* Prompt */}
+            <div>
+              <h3 className="font-heading font-black text-lg sm:text-xl text-slate-900 leading-snug">
+                {currentQ.prompt}
+              </h3>
+              {currentQ.ugandanContext && (
+                <span className="inline-block mt-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                  🇺🇬 {currentQ.ugandanContext}
+                </span>
               )}
             </div>
 
-            {/* Question Type: Multiple Choice */}
+            {/* MULTIPLE CHOICE */}
             {currentQ.type === 'multiple_choice' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-1 gap-2.5">
                 {currentQ.options.map((opt) => {
                   const isSelected = selectedOptionId === opt.id;
                   return (
                     <button
                       key={opt.id}
-                      id={`opt-btn-${opt.id}`}
-                      onClick={() => {
-                        if (!isAnswerChecked) {
-                          soundFx.playClick();
-                          setSelectedOptionId(opt.id);
-                        }
-                      }}
                       disabled={isAnswerChecked}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all font-bold cursor-pointer ${
+                      onClick={() => {
+                        soundFx.playClick();
+                        setSelectedOptionId(opt.id);
+                      }}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all font-bold text-xs sm:text-sm cursor-pointer flex items-center justify-between ${
                         isSelected
-                          ? 'border-amber-500 bg-amber-50/80 text-amber-950 shadow-sm'
-                          : 'border-slate-200 hover:border-slate-300 bg-white text-slate-800'
+                          ? 'border-emerald-500 bg-emerald-50/80 text-emerald-950 shadow-xs'
+                          : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800'
                       }`}
                     >
-                      <div className="flex items-start justify-between">
-                        <span className="text-base">{opt.text}</span>
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            isSelected ? 'border-amber-600 bg-amber-600' : 'border-slate-300'
-                          }`}
-                        >
-                          {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
-                        </div>
+                      <div>
+                        <span>{opt.text}</span>
+                        {opt.sublabel && isAnswerChecked && (
+                          <span className="block text-[11px] font-semibold text-emerald-700 mt-0.5">
+                            {opt.sublabel}
+                          </span>
+                        )}
                       </div>
-                      {opt.sublabel && (
-                        <p className="text-xs text-slate-500 font-normal mt-1">{opt.sublabel}</p>
-                      )}
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        isSelected ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300'
+                      }`}>
+                        {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                      </div>
                     </button>
                   );
                 })}
               </div>
             )}
 
-            {/* Question Type: Drag & Drop / Tap to Pair */}
-            {currentQ.type === 'drag_drop_match' && (
-              <div className="space-y-4 pt-2">
-                <p className="text-xs text-slate-500 font-medium">
-                  Tap a concept on the left, then tap its matching definition on the right:
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Left items */}
-                  <div className="space-y-2.5">
-                    {currentQ.pairs.map((pair) => {
-                      const isPaired = !!matchedPairs[pair.left];
-                      const isCurrentlySelected = selectedLeft === pair.left;
-                      return (
-                        <button
-                          key={pair.id}
-                          onClick={() => !isAnswerChecked && handleSelectLeft(pair.left)}
-                          disabled={isAnswerChecked}
-                          className={`w-full p-3.5 rounded-xl border-2 text-left font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-                            isPaired
-                              ? 'bg-emerald-50 border-emerald-400 text-emerald-900'
-                              : isCurrentlySelected
-                              ? 'bg-amber-100 border-amber-500 text-amber-900 ring-2 ring-amber-300'
-                              : 'bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300'
-                          }`}
-                        >
-                          {pair.left}
-                          {isPaired && <span className="text-[10px] block text-emerald-700">✓ Paired</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Right items */}
-                  <div className="space-y-2.5">
-                    {currentQ.pairs.map((pair) => {
-                      const isPaired = Object.values(matchedPairs).includes(pair.right);
-                      return (
-                        <button
-                          key={pair.id}
-                          onClick={() => !isAnswerChecked && handleSelectRight(pair.right)}
-                          disabled={isAnswerChecked}
-                          className={`w-full p-3.5 rounded-xl border-2 text-left font-medium text-xs sm:text-sm transition-all cursor-pointer ${
-                            isPaired
-                              ? 'bg-emerald-50 border-emerald-400 text-emerald-900 font-bold'
-                              : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-                          }`}
-                        >
-                          {pair.right}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Question Type: Sentence Unscramble */}
+            {/* SENTENCE UNSCRAMBLE */}
             {currentQ.type === 'sentence_unscramble' && (
-              <div className="space-y-6 pt-2">
-                {/* Sentence drop tray */}
-                <div className="min-h-[72px] p-3 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-300 flex flex-wrap gap-2 items-center">
-                  {selectedWords.length === 0 ? (
-                    <span className="text-slate-400 text-xs sm:text-sm italic mx-auto">
-                      Tap words below to arrange the sentence in correct order
+              <div className="space-y-4">
+                {/* Target drop line */}
+                <div className="min-h-16 p-3 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-wrap gap-2 items-center">
+                  {selectedWords.length === 0 && (
+                    <span className="text-xs text-slate-400 font-medium italic">
+                      Tap words below to construct the sentence...
                     </span>
-                  ) : (
-                    selectedWords.map((word, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => !isAnswerChecked && handleRemoveWord(word, idx)}
-                        disabled={isAnswerChecked}
-                        className="px-3.5 py-2 rounded-xl bg-amber-500 text-white font-bold text-sm shadow-xs hover:bg-amber-600 cursor-pointer active:scale-95 transition-transform"
-                      >
-                        {word}
-                      </button>
-                    ))
                   )}
+                  {selectedWords.map((word, idx) => (
+                    <button
+                      key={idx}
+                      disabled={isAnswerChecked}
+                      onClick={() => handleDeselectWord(word, idx)}
+                      className="btn-duo-green px-3.5 py-2 rounded-xl text-xs font-black cursor-pointer shadow-xs"
+                    >
+                      {word}
+                    </button>
+                  ))}
                 </div>
 
-                {/* Available word bank */}
-                <div className="flex flex-wrap gap-2 justify-center">
+                {/* Available word pool */}
+                <div className="flex flex-wrap gap-2">
                   {availableWords.map((word, idx) => (
                     <button
                       key={idx}
-                      onClick={() => !isAnswerChecked && handleAddWord(word, idx)}
                       disabled={isAnswerChecked}
-                      className="px-4 py-2.5 rounded-xl bg-white border-2 border-slate-200 hover:border-amber-400 text-slate-800 font-bold text-sm shadow-xs cursor-pointer active:scale-95 transition-all"
+                      onClick={() => handleSelectWord(word, idx)}
+                      className="btn-duo-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
                     >
                       {word}
                     </button>
@@ -490,265 +602,194 @@ export const LessonModal: React.FC<LessonModalProps> = ({
               </div>
             )}
 
-            {/* Question Type: Interactive Number / Currency Dial */}
-            {currentQ.type === 'interactive_dial' && (
-              <div className="space-y-6 pt-2 text-center">
-                {/* Large Interactive Display */}
-                <div className="bg-amber-50/70 border border-amber-200 rounded-3xl p-6 max-w-sm mx-auto">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    Selected Value
-                  </span>
-                  <div className="font-heading font-black text-3xl sm:text-4xl text-slate-900 mt-1">
-                    {dialValue.toLocaleString()} <span className="text-amber-600 text-2xl">{currentQ.unit}</span>
+            {/* DRAG DROP PAIRING */}
+            {currentQ.type === 'drag_drop_match' && (
+              <div className="space-y-3">
+                <span className="text-xs text-slate-500 font-bold block">
+                  Tap an item on the left, then tap its matching pair on the right:
+                </span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    {currentQ.pairs.map((p) => {
+                      const isMatched = !!matchedPairs[p.left];
+                      const isSelected = selectedLeft === p.left;
+                      return (
+                        <button
+                          key={p.id}
+                          disabled={isAnswerChecked || isMatched}
+                          onClick={() => handleSelectPairLeft(p.left)}
+                          className={`w-full p-3 rounded-xl border-2 text-left text-xs font-bold transition-all cursor-pointer ${
+                            isMatched
+                              ? 'border-emerald-400 bg-emerald-50 text-emerald-800 opacity-60'
+                              : isSelected
+                              ? 'border-blue-500 bg-blue-50 text-blue-900'
+                              : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800'
+                          }`}
+                        >
+                          {p.left}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
 
-                {/* Slider */}
-                <div className="max-w-md mx-auto space-y-2">
-                  <input
-                    type="range"
-                    min={currentQ.min}
-                    max={currentQ.max}
-                    step={currentQ.step}
-                    value={dialValue}
-                    onChange={(e) => {
-                      if (!isAnswerChecked) {
-                        setDialValue(parseFloat(e.target.value));
-                      }
-                    }}
-                    disabled={isAnswerChecked}
-                    className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
-                  />
-                  <div className="flex justify-between text-xs font-bold text-slate-400">
-                    <span>{currentQ.min} {currentQ.unit}</span>
-                    <span>{currentQ.max.toLocaleString()} {currentQ.unit}</span>
+                  <div className="space-y-2">
+                    {currentQ.pairs.map((p) => {
+                      const isPaired = Object.values(matchedPairs).includes(p.right);
+                      return (
+                        <button
+                          key={p.id}
+                          disabled={isAnswerChecked || isPaired}
+                          onClick={() => handleSelectPairRight(p.right)}
+                          className={`w-full p-3 rounded-xl border-2 text-left text-xs font-bold transition-all cursor-pointer ${
+                            isPaired
+                              ? 'border-emerald-400 bg-emerald-50 text-emerald-800 opacity-60'
+                              : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800'
+                          }`}
+                        >
+                          {p.right}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-
-                {/* Quick Step Buttons */}
-                <div className="flex items-center justify-center gap-2">
-                  {[-currentQ.step * 2, -currentQ.step, currentQ.step, currentQ.step * 2].map((delta, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        if (!isAnswerChecked) {
-                          soundFx.playClick();
-                          setDialValue((prev) =>
-                            Math.min(currentQ.max, Math.max(currentQ.min, prev + delta))
-                          );
-                        }
-                      }}
-                      disabled={isAnswerChecked}
-                      className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer"
-                    >
-                      {delta > 0 ? `+${delta}` : delta}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Question Type: Diagram Tap & Hotspots */}
-            {currentQ.type === 'diagram_tap' && (
-              <div className="space-y-4 pt-2">
-                <div className="relative w-full max-w-md mx-auto aspect-4/3 bg-gradient-to-b from-sky-50 to-slate-100 rounded-2xl border-2 border-slate-200 overflow-hidden shadow-inner p-4 flex items-center justify-center">
-                  {/* Visual SVG Diagram Representation */}
-                  {currentQ.diagramType === 'uganda_map' ? (
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      {/* Outline of Uganda */}
-                      <path
-                        d="M 20 20 Q 50 10, 80 20 Q 90 50, 80 80 Q 50 90, 20 80 Q 10 50, 20 20 Z"
-                        fill="#fef08a"
-                        stroke="#ca8a04"
-                        strokeWidth="1.5"
-                      />
-                      {/* Lake Victoria */}
-                      <ellipse cx="65" cy="80" rx="18" ry="12" fill="#38bdf8" stroke="#0284c7" strokeWidth="1" />
-                      {/* Lake Kyoga */}
-                      <path d="M 50 45 Q 60 40, 65 48 Q 55 52, 50 45 Z" fill="#38bdf8" stroke="#0284c7" strokeWidth="1" />
-                      {/* Lake Albert */}
-                      <ellipse cx="28" cy="45" rx="6" ry="14" fill="#38bdf8" stroke="#0284c7" strokeWidth="1" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      {/* Digestive System abstract silhouette */}
-                      <circle cx="50" cy="15" r="7" fill="#fed7aa" stroke="#ea580c" strokeWidth="1" />
-                      <line x1="50" y1="22" x2="50" y2="35" stroke="#ea580c" strokeWidth="3" />
-                      <ellipse cx="46" cy="42" rx="10" ry="7" fill="#fca5a5" stroke="#e11d48" strokeWidth="1" />
-                      <ellipse cx="62" cy="38" rx="8" ry="6" fill="#bbf7d0" stroke="#16a34a" strokeWidth="1" />
-                      <path d="M 40 55 Q 50 65, 60 55 Q 50 75, 40 55" fill="#fed7aa" stroke="#ea580c" strokeWidth="2" />
-                    </svg>
-                  )}
-
-                  {/* Hotspots */}
-                  {currentQ.hotspots.map((spot) => {
-                    const isSelected = tappedHotspotId === spot.id;
-                    return (
-                      <button
-                        key={spot.id}
-                        id={`hotspot-${spot.id}`}
-                        onClick={() => {
-                          if (!isAnswerChecked) {
-                            soundFx.playClick();
-                            setTappedHotspotId(spot.id);
-                          }
-                        }}
-                        disabled={isAnswerChecked}
-                        style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
-                        className={`absolute -translate-x-1/2 -translate-y-1/2 px-2 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 shadow-md transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-amber-500 text-white ring-4 ring-amber-300 scale-110'
-                            : 'bg-white/95 text-slate-800 hover:bg-slate-50 border border-slate-300'
-                        }`}
-                      >
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                        <span>{spot.label}</span>
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
             )}
           </div>
         )}
-      </div>
 
-      {/* AI Tutor Hint Drawer / Modal */}
-      {showHintModal && (
-        <div className="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
-                  <Bot className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-heading font-black text-base text-slate-900">
-                    Kigozi&apos;s Socratic Hint
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    NCDC Study Companion
-                  </p>
-                </div>
+        {/* ========================================================= */}
+        {/* PHASE 3: LESSON COMPLETE & RETENTION CARD */}
+        {/* ========================================================= */}
+        {phase === 'complete' && (
+          <div className="p-6 sm:p-8 space-y-6 text-center overflow-y-auto flex-1">
+            <div className="w-16 h-16 rounded-3xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-2xl mx-auto shadow-lg shadow-amber-400/30">
+              <Trophy className="w-8 h-8" />
+            </div>
+
+            <div>
+              <h2 className="font-heading font-black text-2xl sm:text-3xl text-slate-900">
+                Lesson Mastered!
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                You just locked in high-yield Primary 7 Social Studies knowledge.
+              </p>
+            </div>
+
+            {/* Score & Rewards Stats */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-200 text-center">
+                <span className="text-[10px] font-black uppercase text-emerald-800 block">XP Earned</span>
+                <span className="font-heading font-black text-xl text-emerald-900">+{lesson.xpReward}</span>
               </div>
+              <div className="p-4 rounded-2xl bg-blue-50 border-2 border-blue-200 text-center">
+                <span className="text-[10px] font-black uppercase text-blue-800 block">Enjuba Gems</span>
+                <span className="font-heading font-black text-xl text-blue-900">+{lesson.gemsReward}</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-200 text-center">
+                <span className="text-[10px] font-black uppercase text-amber-800 block">Streak</span>
+                <span className="font-heading font-black text-xl text-amber-900">{userStats.currentStreak + 1} Days</span>
+              </div>
+            </div>
+
+            {/* Key PLE Retention Takeaway */}
+            <div className="p-5 rounded-2xl bg-slate-900 text-white text-left space-y-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5" />
+                Key Memory Retention Fact for PLE:
+              </span>
+              <p className="text-xs text-slate-200 font-semibold leading-relaxed">
+                {lesson.teachSlides?.[0]?.pleExamTip || 'Consistent practice guarantees Aggregate 4 distinction in Primary 7 UNEB national exams.'}
+              </p>
+            </div>
+
+            <div className="pt-2">
               <button
-                onClick={() => {
-                  soundFx.playClick();
-                  setShowHintModal(false);
-                }}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+                onClick={onClose}
+                className="btn-duo-green w-full py-4 rounded-2xl text-base font-black flex items-center justify-center gap-2"
               >
-                <X className="w-5 h-5" />
+                Return to Curriculum Trail
+                <ArrowRight className="w-5 h-5" />
               </button>
             </div>
+          </div>
+        )}
 
-            <div className="py-4">
-              {isLoadingAi ? (
-                <div className="flex flex-col items-center justify-center py-6 text-center space-y-3">
-                  <div className="w-8 h-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs font-semibold text-slate-600">
-                    Kigozi is thinking of a relatable hint for you...
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-slate-800 text-sm leading-relaxed whitespace-pre-line">
-                    {aiHint}
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => handleSpeak(aiHint || '')}
-                      className="text-xs font-bold text-amber-800 hover:text-amber-900 flex items-center gap-1 cursor-pointer"
-                    >
-                      <Volume2 className="w-4 h-4" />
-                      Listen to Hint
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
+        {/* ========================================================= */}
+        {/* BOTTOM ACTION BAR */}
+        {/* ========================================================= */}
+        {phase === 'teach' && (
+          <div className="p-4 sm:p-5 border-t-2 border-slate-100 bg-white flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500">
+              Slide {teachSlideIndex + 1} of {teachSlides.length}
+            </span>
             <button
-              onClick={() => {
-                soundFx.playClick();
-                setShowHintModal(false);
-              }}
-              className="w-full btn-3d-amber py-2.5 rounded-xl text-white font-bold text-sm cursor-pointer"
+              onClick={handleNextTeachSlide}
+              className="btn-duo-blue px-8 py-3 rounded-2xl text-xs sm:text-sm font-black flex items-center gap-2"
             >
-              Got it, let me try!
+              {teachSlideIndex < teachSlides.length - 1 ? 'Next Slide' : 'Start Practice'}
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Bottom Action / Validation Bar */}
-      {!isFinished && (
-        <div
-          className={`border-t py-4 px-4 sm:px-8 transition-colors duration-200 ${
+        {phase === 'practice' && (
+          <div className={`p-4 sm:p-5 border-t-2 flex flex-col sm:flex-row items-center justify-between gap-3 ${
             isAnswerChecked
               ? isCorrect
-                ? 'bg-emerald-100 border-emerald-300'
-                : 'bg-rose-100 border-rose-300'
-              : 'bg-white border-slate-200'
-          }`}
-        >
-          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                ? 'bg-emerald-50 border-emerald-200'
+                : 'bg-rose-50 border-rose-200'
+              : 'bg-white border-slate-100'
+          }`}>
             {isAnswerChecked ? (
               <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                    isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
-                  }`}
-                >
-                  {isCorrect ? <CheckCircle2 className="w-7 h-7" /> : <AlertCircle className="w-7 h-7" />}
-                </div>
+                {isCorrect ? (
+                  <CheckCircle2 className="w-7 h-7 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-7 h-7 text-rose-600 shrink-0" />
+                )}
                 <div>
-                  <h4
-                    className={`font-heading font-black text-base ${
-                      isCorrect ? 'text-emerald-950' : 'text-rose-950'
-                    }`}
-                  >
-                    {isCorrect ? 'Oli Muzira! Excellent!' : 'Not quite right, scholar.'}
+                  <h4 className={`font-heading font-black text-sm ${isCorrect ? 'text-emerald-950' : 'text-rose-950'}`}>
+                    {isCorrect ? 'Superb! Distinction Standard' : 'Not quite right yet'}
                   </h4>
-                  <p
-                    className={`text-xs font-medium max-w-md ${
-                      isCorrect ? 'text-emerald-900' : 'text-rose-900'
-                    }`}
-                  >
-                    {currentQ.explanation}
+                  <p className="text-[11px] text-slate-700 font-medium">
+                    {currentQ?.explanation}
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="hidden sm:block text-xs font-semibold text-slate-600">
-                Question {currentIndex + 1} of {lesson.questions.length}
-              </div>
+              <span className="text-xs font-bold text-slate-400">
+                Select your answer to verify
+              </span>
             )}
 
-            <div className="w-full sm:w-auto">
-              {isAnswerChecked ? (
+            <div className="w-full sm:w-auto flex justify-end">
+              {!isAnswerChecked ? (
                 <button
-                  id="lesson-continue-btn"
-                  onClick={handleContinue}
-                  className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl font-extrabold text-sm text-white shadow-md cursor-pointer transition-transform active:scale-95 ${
-                    isCorrect ? 'btn-3d-emerald' : 'btn-3d-rose'
-                  }`}
+                  disabled={
+                    (currentQ?.type === 'multiple_choice' && !selectedOptionId) ||
+                    (currentQ?.type === 'sentence_unscramble' && selectedWords.length === 0)
+                  }
+                  onClick={handleCheckAnswer}
+                  className="btn-duo-green w-full sm:w-auto px-8 py-3 rounded-2xl text-xs sm:text-sm font-black"
                 >
-                  Continue
+                  Check Answer
                 </button>
               ) : (
                 <button
-                  id="lesson-check-btn"
-                  onClick={handleCheckAnswer}
-                  className="w-full sm:w-auto btn-3d-amber px-8 py-3.5 rounded-2xl font-extrabold text-sm text-white shadow-md cursor-pointer transition-transform active:scale-95"
+                  onClick={handleNextQuestion}
+                  className={`w-full sm:w-auto px-8 py-3 rounded-2xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 ${
+                    isCorrect ? 'btn-duo-green' : 'btn-duo-red'
+                  }`}
                 >
-                  Check Answer
+                  Continue
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
     </div>
   );
 };

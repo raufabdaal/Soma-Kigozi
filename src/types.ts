@@ -1,6 +1,8 @@
 export type GradeLevel = 'P.1' | 'P.2' | 'P.3' | 'P.4' | 'P.5' | 'P.6' | 'P.7';
 
-export type SubjectId = 'math' | 'science' | 'sst' | 'english';
+export type SubjectId = 'sst' | 'math' | 'science' | 'english';
+
+export type UserRole = 'student' | 'parent';
 
 export interface SubjectMeta {
   id: SubjectId;
@@ -8,6 +10,7 @@ export interface SubjectMeta {
   ncdcCode: string;
   iconName: string;
   themeColor: string; // Tailwind color name like 'amber', 'emerald', 'indigo', 'rose'
+  badgeLabel?: string;
   description: string;
   pleWeight: string;
 }
@@ -69,7 +72,7 @@ export interface InteractiveDialQuestion extends BaseQuestion {
 export interface DiagramTapQuestion extends BaseQuestion {
   type: 'diagram_tap';
   diagramTitle: string;
-  diagramType: 'human_heart' | 'digestive_system' | 'plant_parts' | 'uganda_map' | 'water_cycle';
+  diagramType: 'human_heart' | 'digestive_system' | 'plant_parts' | 'uganda_map' | 'water_cycle' | 'east_africa_rift';
   hotspots: {
     id: string;
     label: string;
@@ -87,6 +90,31 @@ export type Question =
   | InteractiveDialQuestion
   | DiagramTapQuestion;
 
+export interface TeachSlide {
+  id: string;
+  title: string;
+  conceptHeading: string;
+  body: string;
+  bullets?: string[];
+  visualType?: 
+    | 'rift_valley_diagram' 
+    | 'nile_drainage_map' 
+    | 'bantu_migration_map' 
+    | 'independence_flag'
+    | 'buganda_agreement'
+    | 'eac_map'
+    | 'currency_ugx'
+    | 'human_heart';
+  pleExamTip: string;
+  realLifeUgandaExample: string;
+  quickCheck?: {
+    prompt: string;
+    options: string[];
+    correctIndex: number;
+    explanation: string;
+  };
+}
+
 export interface LessonNode {
   id: string;
   unitId: string;
@@ -94,9 +122,10 @@ export interface LessonNode {
   subtitle: string;
   gradeLevel: GradeLevel;
   subjectId: SubjectId;
-  ncdcStrand: string; // e.g. "Numbers & Operations", "Health & Sanitation"
+  ncdcStrand: string; // e.g. "Numbers & Operations", "Physical Features & Drainage"
   xpReward: number;
   gemsReward: number;
+  teachSlides?: TeachSlide[];
   questions: Question[];
   isLocked?: boolean;
   isCompleted?: boolean;
@@ -107,17 +136,27 @@ export interface LessonNode {
 export interface CurriculumUnit {
   id: string;
   title: string;
+  unitNumber: number;
   term: 1 | 2 | 3;
   gradeLevel: GradeLevel;
   subjectId: SubjectId;
   description: string;
   bannerColor: string;
+  themeGradient: string;
+  accentColor: string;
   lessons: LessonNode[];
 }
 
 export interface UserStats {
+  hasCompletedOnboarding: boolean;
+  userRole: UserRole;
   studentName: string;
+  parentName?: string;
+  parentPhone?: string;
+  targetSecondarySchool?: string;
+  dailyGoalMinutes: number;
   gradeLevel: GradeLevel;
+  activeSubjectId: SubjectId;
   currentStreak: number;
   highestStreak: number;
   streakFreezes: number;
@@ -135,7 +174,7 @@ export interface UserStats {
   weakTopics: string[];
   strongTopics: string[];
   badges: Badge[];
-  downloadedPacks: string[]; // e.g. ["P.6-math", "P.6-science"]
+  downloadedPacks: string[]; // e.g. ["P.7-sst", "P.7-math"]
   isDataSaver: boolean;
   isOfflineMode: boolean;
   parentPin: string;

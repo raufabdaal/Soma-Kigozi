@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { UserStats, LessonNode, SubjectId } from './types';
 import { CURRICULUM_UNITS } from './data/curriculumData';
 import { loadUserStats, saveUserStats } from './services/storageService';
 import { Navbar } from './components/Navbar';
+import { HamburgerDrawer } from './components/HamburgerDrawer';
+import { OnboardingModal } from './components/OnboardingModal';
 import { StudentHome } from './components/StudentHome';
 import { LessonModal } from './components/LessonModal';
 import { ParentPortal } from './components/ParentPortal';
@@ -13,10 +15,14 @@ import { KigoziAIChat } from './components/KigoziAIChat';
 export default function App() {
   const [userStats, setUserStats] = useState<UserStats>(() => loadUserStats());
   const [activeTab, setActiveTab] = useState<'study' | 'practice' | 'parent' | 'offline'>('study');
-  const [activeSubject, setActiveSubject] = useState<SubjectId>('math');
+  const [activeSubject, setActiveSubject] = useState<SubjectId>(userStats.activeSubjectId || 'sst');
   const [activeLesson, setActiveLesson] = useState<LessonNode | null>(null);
   const [showKigoziChat, setShowKigoziChat] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  
+  // Drawer and Onboarding states
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(!userStats.hasCompletedOnboarding);
 
   // Sync to local storage whenever userStats updates
   const handleUpdateStats = (newStats: UserStats) => {
@@ -62,19 +68,43 @@ export default function App() {
     handleUpdateStats(newStats);
   };
 
+  const handleOnboardingComplete = (updatedStats: UserStats) => {
+    handleUpdateStats(updatedStats);
+    setActiveSubject(updatedStats.activeSubjectId || 'sst');
+    if (updatedStats.userRole === 'parent') {
+      setActiveTab('parent');
+    } else {
+      setActiveTab('study');
+    }
+    setShowOnboarding(false);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
-      {/* Top Universal Navbar */}
+    <div className="min-h-screen bg-[#f7f9fa] text-slate-900 flex flex-col font-sans selection:bg-amber-200">
+      {/* Top Universal Clean Navbar */}
       <Navbar
+        userStats={userStats}
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+        activeTab={activeTab}
+        onNavigateHome={() => setActiveTab('study')}
+      />
+
+      {/* Hamburger Navigation Drawer */}
+      <HamburgerDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
         userStats={userStats}
         onUpdateStats={handleUpdateStats}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        activeSubject={activeSubject}
+        setActiveSubject={setActiveSubject}
+        onReopenOnboarding={() => setShowOnboarding(true)}
         isMuted={isMuted}
         setIsMuted={setIsMuted}
       />
 
-      {/* Main Screen Router */}
+      {/* Main Screen Content */}
       <main className="flex-1">
         {activeTab === 'study' && (
           <StudentHome
@@ -111,7 +141,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Interactive Lesson Modal Engine */}
+      {/* Interactive Lesson Modal (Teach -> Practice -> Retain) */}
       {activeLesson && (
         <LessonModal
           lesson={activeLesson}
@@ -126,6 +156,16 @@ export default function App() {
         <KigoziAIChat
           onClose={() => setShowKigoziChat(false)}
           gradeLevel={userStats.gradeLevel}
+        />
+      )}
+
+      {/* Role & Persona Onboarding Modal */}
+      {showOnboarding && (
+        <OnboardingModal
+          userStats={userStats}
+          onComplete={handleOnboardingComplete}
+          onClose={() => setShowOnboarding(false)}
+          isDevReopen={userStats.hasCompletedOnboarding}
         />
       )}
     </div>
