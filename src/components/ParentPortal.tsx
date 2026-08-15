@@ -10,7 +10,6 @@ import {
   CheckCircle, 
   Flame, 
   Trophy, 
-  BookOpen,
   GraduationCap
 } from 'lucide-react';
 import { calculatePleProjection } from '../services/storageService';
@@ -42,7 +41,7 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 space-y-6">
       
       {/* Header Card */}
-      <div className="bg-slate-900 rounded-3xl p-6 sm:p-7 text-white shadow-md border-b-4 border-slate-950 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-slate-900 dark:bg-[#1b2a32] rounded-3xl p-6 sm:p-7 text-white shadow-md border-b-4 border-slate-950 dark:border-[#37464f] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
@@ -72,28 +71,28 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white rounded-3xl p-4 border-2 border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-4 border-2 border-slate-200 dark:border-[#37464f] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500">Mastery</span>
-            <TrendingUp className="w-4 h-4 text-emerald-600" />
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Mastery</span>
+            <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="font-heading font-black text-2xl text-slate-900">
+            <span className="font-heading font-black text-2xl text-slate-900 dark:text-white">
               {userStats.currentMastery}%
             </span>
           </div>
-          <span className="text-[10px] font-bold text-emerald-600">
+          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
             +{userStats.currentMastery - userStats.baselineScore}% vs baseline
           </span>
         </div>
 
-        <div className="bg-white rounded-3xl p-4 border-2 border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-4 border-2 border-slate-200 dark:border-[#37464f] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500">PLE Forecast</span>
-            <Award className="w-4 h-4 text-blue-600" />
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">PLE Forecast</span>
+            <Award className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="mt-2">
-            <span className="font-heading font-black text-xl text-blue-900 block">
+            <span className="font-heading font-black text-xl text-blue-900 dark:text-blue-300 block">
               {projection.division}
             </span>
           </div>
@@ -102,28 +101,28 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
           </span>
         </div>
 
-        <div className="bg-white rounded-3xl p-4 border-2 border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-4 border-2 border-slate-200 dark:border-[#37464f] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500">Study Streak</span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Study Streak</span>
             <Flame className="w-4 h-4 text-amber-500 fill-amber-400" />
           </div>
           <div className="mt-2">
-            <span className="font-heading font-black text-2xl text-slate-900">
+            <span className="font-heading font-black text-2xl text-slate-900 dark:text-white">
               {userStats.currentStreak} Days
             </span>
           </div>
-          <span className="text-[10px] font-bold text-amber-600">
+          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
             Active streak
           </span>
         </div>
 
-        <div className="bg-white rounded-3xl p-4 border-2 border-slate-200 shadow-xs">
+        <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-4 border-2 border-slate-200 dark:border-[#37464f] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500">Tutor Savings</span>
-            <DollarSign className="w-4 h-4 text-emerald-600" />
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Tutor Savings</span>
+            <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div className="mt-2">
-            <span className="font-heading font-black text-lg text-emerald-900 truncate">
+            <span className="font-heading font-black text-lg text-emerald-900 dark:text-emerald-300 truncate">
               UGX {(estimatedSavingsUGX / 1000).toLocaleString()}k
             </span>
           </div>
@@ -134,52 +133,54 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
       </div>
 
       {/* Target Dream Secondary School Aspirations */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-5 sm:p-6 border-2 border-slate-200 dark:border-[#37464f] shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-heading font-black text-base text-slate-900">
+            <h3 className="font-heading font-black text-base text-slate-900 dark:text-white">
               Dream Secondary School Goal
             </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Target: {userStats.targetSchool || 'King&apos;s College Budo'} (Cut-off: Aggregate 4-5)
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              Target: {userStats.targetSecondarySchool || "King's College Budo"} (Cut-off: Aggregate 4-5)
             </p>
           </div>
-          <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
+          <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-emerald-800">
             On Track
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202f36] border border-slate-200 dark:border-[#37464f] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center font-heading font-black text-sm">
-              <Trophy className="w-5 h-5 text-amber-600" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-900 flex items-center justify-center font-heading font-black text-sm">
+              <Trophy className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <span className="font-heading font-black text-sm text-slate-900 block">
+              <span className="font-heading font-black text-sm text-slate-900 dark:text-white block">
                 Primary Leaving Examinations (PLE) Readiness
               </span>
-              <span className="text-xs text-slate-500 font-medium">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 {userStats.completedLessonIds.length} Curriculum Units Mastered • {userStats.totalXp} Total XP Earned
               </span>
             </div>
           </div>
-          <CheckCircle className="w-5 h-5 text-emerald-600" />
+          <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
         </div>
       </div>
 
       {/* Printable Report Card Preview */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-5 sm:p-6 border-2 border-slate-200 dark:border-[#37464f] shadow-xs space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-heading font-black text-base text-slate-900">
+          <h3 className="font-heading font-black text-base text-slate-900 dark:text-white">
             Shareable Scholar Card
           </h3>
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#202f36] p-1 rounded-xl">
             {(['slate', 'navy', 'emerald'] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setActiveCardTheme(t)}
                 className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase cursor-pointer ${
-                  activeCardTheme === t ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+                  activeCardTheme === t
+                    ? 'bg-white dark:bg-[#1b2a32] text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
                 {t}
@@ -220,7 +221,7 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
               {userStats.studentName}
             </h4>
             <p className="text-xs text-white/80 font-medium">
-              Target: {userStats.targetSchool}
+              Target: {userStats.targetSecondarySchool || "King's College Budo"}
             </p>
           </div>
 
@@ -243,7 +244,7 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
         <div className="flex gap-2.5 pt-2">
           <button
             onClick={handlePrint}
-            className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            className="flex-1 py-3 btn-duo-dark rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
             <Download className="w-4 h-4" />
             Save / Print Card
@@ -253,7 +254,7 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
               soundFx.playClick();
               navigator.clipboard?.writeText(window.location.href);
             }}
-            className="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200"
+            className="px-5 py-3 btn-duo-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Share2 className="w-4 h-4" />
             Share

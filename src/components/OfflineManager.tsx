@@ -7,59 +7,16 @@ import {
   CheckCircle2, 
   RefreshCw, 
   HardDrive, 
-  Layers
+  Layers 
 } from 'lucide-react';
-import { getSyncQueue, clearSyncQueue } from '../services/storageService';
+import { AVAILABLE_PACKS } from '../data/curriculumData';
 import { soundFx } from '../services/soundEffects';
+import { getSyncQueue, clearSyncQueue } from '../services/storageService';
 
 interface OfflineManagerProps {
   userStats: UserStats;
   onUpdateStats: (newStats: UserStats) => void;
 }
-
-interface CurriculumPack {
-  id: string;
-  name: string;
-  grade: string;
-  sizeMb: number;
-  lessonsCount: number;
-  description: string;
-}
-
-const AVAILABLE_PACKS: CurriculumPack[] = [
-  {
-    id: 'P.7-sst',
-    name: 'P.7 Social Studies & Civics Full Pack',
-    grade: 'P.7',
-    sizeMb: 3.5,
-    lessonsCount: 14,
-    description: 'Physical features of East Africa, River Nile drainage, migrations & civics for PLE.',
-  },
-  {
-    id: 'P.7-science',
-    name: 'P.7 Integrated Science Pack',
-    grade: 'P.7',
-    sizeMb: 3.8,
-    lessonsCount: 16,
-    description: 'Human circulatory & digestive systems, crop husbandry, energy, sound and vectors.',
-  },
-  {
-    id: 'P.7-math',
-    name: 'P.7 Mathematics Full NCDC Pack',
-    grade: 'P.7',
-    sizeMb: 4.2,
-    lessonsCount: 18,
-    description: 'Commercial arithmetic, percentages, speed & time, algebra and PLE mock exams.',
-  },
-  {
-    id: 'P.7-english',
-    name: 'P.7 English Grammar & Vocabulary',
-    grade: 'P.7',
-    sizeMb: 2.9,
-    lessonsCount: 15,
-    description: 'Direct & indirect speech, conditional clauses, formal letters & comprehension.',
-  },
-];
 
 export const OfflineManager: React.FC<OfflineManagerProps> = ({
   userStats,
@@ -67,15 +24,13 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
 }) => {
   const [downloadingPackId, setDownloadingPackId] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
-
   const syncQueue = getSyncQueue();
 
   const handleToggleOfflineMode = () => {
     soundFx.playClick();
-    const nextState = !userStats.isOfflineMode;
     onUpdateStats({
       ...userStats,
-      isOfflineMode: nextState,
+      isOfflineMode: !userStats.isOfflineMode,
     });
   };
 
@@ -125,20 +80,20 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 space-y-6">
       
       {/* Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-6 sm:p-7 border-2 border-slate-200 dark:border-[#37464f] shadow-xs space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center">
             {userStats.isOfflineMode ? (
-              <WifiOff className="w-6 h-6 text-slate-700" />
+              <WifiOff className="w-6 h-6 text-slate-700 dark:text-slate-300" />
             ) : (
-              <Wifi className="w-6 h-6 text-emerald-600" />
+              <Wifi className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
             )}
           </div>
           <div>
-            <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900">
+            <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
               Offline Storage & Low-Bandwidth Delivery
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm font-medium">
+            <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium">
               Study without internet or mobile data dropouts. Cache lessons directly onto your device.
             </p>
           </div>
@@ -147,12 +102,12 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
         {/* Toggles */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
           {/* Offline Mode Switch */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202f36] border border-slate-200 dark:border-[#37464f] flex items-center justify-between">
             <div className="space-y-0.5">
-              <span className="font-heading font-black text-sm text-slate-900 block">
+              <span className="font-heading font-black text-sm text-slate-900 dark:text-white block">
                 Offline Mode
               </span>
-              <span className="text-[11px] text-slate-500 font-medium block">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
                 {userStats.isOfflineMode ? 'Running from device cache' : 'Connected to server'}
               </span>
             </div>
@@ -160,7 +115,7 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
               id="offline-mode-toggle-btn"
               onClick={handleToggleOfflineMode}
               className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-                userStats.isOfflineMode ? 'bg-emerald-500' : 'bg-slate-300'
+                userStats.isOfflineMode ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
               }`}
             >
               <div
@@ -172,12 +127,12 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
           </div>
 
           {/* Low-Bandwidth Data-Saver Switch */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202f36] border border-slate-200 dark:border-[#37464f] flex items-center justify-between">
             <div className="space-y-0.5">
-              <span className="font-heading font-black text-sm text-slate-900 block">
+              <span className="font-heading font-black text-sm text-slate-900 dark:text-white block">
                 Data-Saver (Low-Bandwidth)
               </span>
-              <span className="text-[11px] text-slate-500 font-medium block">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
                 {userStats.isDataSaver ? 'Compressed 2G/3G assets' : 'Standard graphics enabled'}
               </span>
             </div>
@@ -185,7 +140,7 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
               id="data-saver-toggle-btn"
               onClick={handleToggleDataSaver}
               className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-                userStats.isDataSaver ? 'bg-blue-500' : 'bg-slate-300'
+                userStats.isDataSaver ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-600'
               }`}
             >
               <div
@@ -199,16 +154,16 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
       </div>
 
       {/* Sync Queue Card */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-5 sm:p-6 border-2 border-slate-200 dark:border-[#37464f] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center">
+          <div className="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-[#202f36] text-slate-700 dark:text-slate-300 flex items-center justify-center">
             <HardDrive className="w-5 h-5" />
           </div>
           <div>
-            <span className="font-heading font-black text-sm text-slate-900 block">
+            <span className="font-heading font-black text-sm text-slate-900 dark:text-white block">
               Device Storage & Local Sync
             </span>
-            <span className="text-xs text-slate-500 font-medium">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               {totalDownloadedMb.toFixed(1)} MB Cached • {syncQueue.length} pending local records
             </span>
           </div>
@@ -225,7 +180,7 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
       </div>
 
       {syncMessage && (
-        <div className="p-3.5 bg-emerald-50 border-2 border-emerald-200 rounded-2xl text-xs font-black text-emerald-900 text-center animate-in fade-in">
+        <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-200 dark:border-emerald-800 rounded-2xl text-xs font-black text-emerald-900 dark:text-emerald-200 text-center animate-in fade-in">
           {syncMessage}
         </div>
       )}
@@ -233,10 +188,10 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
       {/* Downloadable NCDC Curriculum Packs */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-heading font-black text-base text-slate-900">
+          <h3 className="font-heading font-black text-base text-slate-900 dark:text-white">
             NCDC Offline Curriculum Packs
           </h3>
-          <span className="text-xs font-bold text-slate-500">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
             {userStats.downloadedPacks.length} of {AVAILABLE_PACKS.length} Downloaded
           </span>
         </div>
@@ -249,35 +204,35 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
             return (
               <div
                 key={pack.id}
-                className="bg-white rounded-3xl p-5 border-2 border-slate-200 shadow-xs flex flex-col justify-between space-y-3.5"
+                className="bg-white dark:bg-[#1b2a32] rounded-3xl p-5 border-2 border-slate-200 dark:border-[#37464f] shadow-xs flex flex-col justify-between space-y-3.5"
               >
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="bg-blue-50 text-blue-900 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-blue-200">
+                    <span className="bg-blue-50 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
                       {pack.grade} NCDC
                     </span>
-                    <span className="text-xs font-bold text-slate-500">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                       {pack.sizeMb} MB
                     </span>
                   </div>
 
-                  <h4 className="font-heading font-black text-base text-slate-900">
+                  <h4 className="font-heading font-black text-base text-slate-900 dark:text-white">
                     {pack.name}
                   </h4>
-                  <p className="text-xs text-slate-600 mt-1 font-medium leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium leading-relaxed">
                     {pack.description}
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                <div className="pt-3 border-t border-slate-100 dark:border-[#202f36] flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                     <Layers className="w-3.5 h-3.5" />
                     {pack.lessonsCount} Modules
                   </span>
 
                   {isDownloaded ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       Cached
                     </span>
                   ) : (

@@ -761,3 +761,48 @@ export const DAILY_QUESTS: DailyQuest[] = [
     iconName: 'Clock',
   },
 ];
+
+export interface OfflinePack {
+  id: string;
+  name: string;
+  grade: string;
+  sizeMb: number;
+  lessonsCount: number;
+  description: string;
+}
+
+export const AVAILABLE_PACKS: OfflinePack[] = [
+  {
+    id: 'P.7-sst',
+    name: 'Primary 7 Social Studies & Civics',
+    grade: 'P.7',
+    sizeMb: 1.4,
+    lessonsCount: 6,
+    description: 'The physical features of East Africa, drainage basins, ethnic migrations & 1900 Buganda Agreement.',
+  },
+  {
+    id: 'P.7-science',
+    name: 'Primary 7 Integrated Science',
+    grade: 'P.7',
+    sizeMb: 1.8,
+    lessonsCount: 5,
+    description: 'Circulatory and digestive systems, malaria transmission cycles, and environmental energy.',
+  },
+  {
+    id: 'P.7-math',
+    name: 'Primary 7 Mathematics',
+    grade: 'P.7',
+    sizeMb: 1.2,
+    lessonsCount: 6,
+    description: 'Commercial math, percentage calculations, speed-time distance problems, and coordinate geometry.',
+  },
+  {
+    id: 'P.7-english',
+    name: 'Primary 7 English Language',
+    grade: 'P.7',
+    sizeMb: 0.9,
+    lessonsCount: 4,
+    description: 'Complex conjunctions, direct and reported speech, and comprehension exercises.',
+  },
+];
+

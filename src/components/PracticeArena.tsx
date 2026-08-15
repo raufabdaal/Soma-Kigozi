@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserStats, Question, SubjectId } from '../types';
 import { CURRICULUM_UNITS, SUBJECTS } from '../data/curriculumData';
+import { SubjectBadge } from './SubjectBadge';
 import { 
   Zap, 
   RotateCcw, 
@@ -9,10 +10,6 @@ import {
   Trophy, 
   Timer, 
   ArrowRight,
-  Globe,
-  FlaskConical,
-  Calculator,
-  BookOpenCheck,
   Check
 } from 'lucide-react';
 import { soundFx } from '../services/soundEffects';
@@ -37,19 +34,6 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [isSessionFinished, setIsSessionFinished] = useState(false);
-
-  const getSubjectIcon = (id: SubjectId) => {
-    switch (id) {
-      case 'sst':
-        return <Globe className="w-5 h-5 text-blue-500" />;
-      case 'science':
-        return <FlaskConical className="w-5 h-5 text-emerald-500" />;
-      case 'math':
-        return <Calculator className="w-5 h-5 text-amber-500" />;
-      case 'english':
-        return <BookOpenCheck className="w-5 h-5 text-rose-500" />;
-    }
-  };
 
   // Extract questions for rapid practice
   const practiceQuestions: Question[] = React.useMemo(() => {
@@ -141,7 +125,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
 
         <button
           onClick={onBackToHome}
-          className="bg-white hover:bg-slate-50 text-slate-900 px-4 py-2 rounded-2xl text-xs font-black shadow-xs transition-colors cursor-pointer self-start md:self-center whitespace-nowrap"
+          className="btn-duo-white px-4 py-2 rounded-2xl text-xs font-black shadow-xs cursor-pointer self-start md:self-center whitespace-nowrap"
         >
           ← Return to Trail
         </button>
@@ -149,12 +133,12 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
 
       {!isSessionActive ? (
         /* Subject Picker Card */
-        <div className="bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 shadow-xs space-y-5">
+        <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-6 sm:p-7 border-2 border-slate-200 dark:border-[#37464f] shadow-xs space-y-5">
           <div>
-            <h2 className="font-heading font-black text-base text-slate-900">
+            <h2 className="font-heading font-black text-base text-slate-900 dark:text-white">
               Select Subject:
             </h2>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               Choose an NCDC core paper to practice
             </p>
           </div>
@@ -171,14 +155,12 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                   }}
                   className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between h-28 ${
                     isSelected
-                      ? 'border-amber-500 bg-amber-50/80 text-amber-950 shadow-xs'
-                      : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
+                      ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-950 dark:text-amber-200 shadow-xs'
+                      : 'border-slate-200 dark:border-[#37464f] hover:border-slate-300 bg-white dark:bg-[#202f36] text-slate-700 dark:text-slate-200'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-2xs">
-                      {getSubjectIcon(sub.id)}
-                    </div>
+                    <SubjectBadge subjectId={sub.id} size="sm" />
                     {isSelected && (
                       <div className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs">
                         <Check className="w-3 h-3 stroke-[3]" />
@@ -186,7 +168,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                     )}
                   </div>
                   <div>
-                    <span className="font-heading font-black text-xs sm:text-sm block text-slate-900">
+                    <span className="font-heading font-black text-xs sm:text-sm block text-slate-900 dark:text-white">
                       {sub.name}
                     </span>
                     <span className="text-[10px] uppercase font-bold text-slate-400">
@@ -198,16 +180,16 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             })}
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202f36] border border-slate-200 dark:border-[#37464f] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center">
-                <Timer className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-900 flex items-center justify-center">
+                <Timer className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <span className="text-xs font-black text-slate-900 block">
+                <span className="text-xs font-black text-slate-900 dark:text-white block">
                   5 Questions • Speed Sprint
                 </span>
-                <span className="text-[11px] text-slate-500 font-semibold">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
                   Earn +35 XP and +8 Enjuba Gems
                 </span>
               </div>
@@ -224,17 +206,17 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
         </div>
       ) : isSessionFinished ? (
         /* Sprint Complete Summary */
-        <div className="bg-white rounded-3xl p-8 text-center border-2 border-slate-200 shadow-lg space-y-6">
+        <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-8 text-center border-2 border-slate-200 dark:border-[#37464f] shadow-lg space-y-6">
           <div className="w-16 h-16 rounded-3xl bg-amber-400 text-slate-950 flex items-center justify-center mx-auto shadow-md">
             <Trophy className="w-8 h-8 stroke-[2.5]" />
           </div>
 
           <div>
-            <h2 className="font-heading font-black text-2xl text-slate-900">
+            <h2 className="font-heading font-black text-2xl text-slate-900 dark:text-white">
               Sprint Complete!
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
-              You scored <span className="font-black text-amber-700">{score} of {practiceQuestions.length}</span> correct!
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium">
+              You scored <span className="font-black text-amber-600 dark:text-amber-400">{score} of {practiceQuestions.length}</span> correct!
             </p>
           </div>
 
@@ -257,17 +239,17 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
         </div>
       ) : (
         /* Active Rapid Fire Question */
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200 shadow-sm space-y-6">
+        <div className="bg-white dark:bg-[#1b2a32] rounded-3xl p-6 sm:p-8 border-2 border-slate-200 dark:border-[#37464f] shadow-sm space-y-6">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-400">
               Question {currentIndex + 1} of {practiceQuestions.length}
             </span>
-            <span className="text-xs font-black text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+            <span className="text-xs font-black text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
               {currentQ.ncdcTopic}
             </span>
           </div>
 
-          <h3 className="font-heading font-black text-xl text-slate-900 leading-snug">
+          <h3 className="font-heading font-black text-xl text-slate-900 dark:text-white leading-snug">
             {currentQ.prompt}
           </h3>
 
@@ -282,13 +264,13 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                     disabled={isAnswerChecked}
                     className={`p-4 rounded-2xl border-2 text-left font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-between ${
                       isSelected
-                        ? 'border-amber-500 bg-amber-50 text-amber-950 shadow-xs'
-                        : 'border-slate-200 hover:border-slate-300 bg-white text-slate-800'
+                        ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-950 dark:text-amber-200 shadow-xs'
+                        : 'border-slate-200 dark:border-[#37464f] hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-[#202f36] text-slate-800 dark:text-slate-200'
                     }`}
                   >
                     <span>{opt.text}</span>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                      isSelected ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300'
+                      isSelected ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300 dark:border-slate-600'
                     }`}>
                       {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
@@ -297,7 +279,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
               })}
             </div>
           ) : (
-            <div className="p-4 rounded-2xl bg-slate-50 text-slate-700 text-xs font-medium">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202f36] text-slate-700 dark:text-slate-300 text-xs font-medium">
               <p>{currentQ.explanation}</p>
             </div>
           )}
@@ -306,20 +288,20 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             <div
               className={`p-4 rounded-2xl border-2 flex items-center gap-3 ${
                 isCorrect
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
-                  : 'bg-rose-50 border-rose-200 text-rose-950'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200'
+                  : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-950 dark:text-rose-200'
               }`}
             >
               {isCorrect ? (
-                <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
               ) : (
-                <AlertCircle className="w-6 h-6 text-rose-600 shrink-0" />
+                <AlertCircle className="w-6 h-6 text-rose-600 dark:text-rose-400 shrink-0" />
               )}
               <div className="text-xs">
                 <span className="font-black block text-sm">
                   {isCorrect ? 'Correct!' : 'Incorrect'}
                 </span>
-                <span className="font-medium text-slate-700">{currentQ.explanation}</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">{currentQ.explanation}</span>
               </div>
             </div>
           )}

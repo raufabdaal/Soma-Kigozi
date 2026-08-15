@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UserStats, LessonNode, SubjectId } from './types';
 import { CURRICULUM_UNITS } from './data/curriculumData';
 import { loadUserStats, saveUserStats } from './services/storageService';
+import { useTheme } from './services/themeManager';
 import { Navbar } from './components/Navbar';
 import { BottomNav, NavTab } from './components/BottomNav';
 import { OnboardingScreen } from './components/OnboardingScreen';
@@ -17,6 +18,8 @@ export default function App() {
   const [activeSubject, setActiveSubject] = useState<SubjectId>(userStats.activeSubjectId || 'sst');
   const [activeLesson, setActiveLesson] = useState<LessonNode | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(!userStats.hasCompletedOnboarding);
+
+  const { theme, setTheme, isDarkMode } = useTheme();
 
   // Sync to local storage whenever userStats updates
   const handleUpdateStats = (newStats: UserStats) => {
@@ -99,7 +102,7 @@ export default function App() {
 
   // 3. MAIN BROWSING APPLICATION (Persistent Navbar & BottomNav)
   return (
-    <div className="min-h-screen bg-[#f7f9fa] text-slate-900 flex flex-col font-sans selection:bg-amber-200">
+    <div className="min-h-screen bg-[#f7f9fa] dark:bg-[#131f24] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-amber-200 dark:selection:bg-amber-900 transition-colors duration-200">
       
       {/* Top Header Navbar */}
       <Navbar
@@ -107,6 +110,9 @@ export default function App() {
         activeSubject={activeSubject}
         setActiveSubject={setActiveSubject}
         onNavigateHome={() => setActiveTab('study')}
+        theme={theme}
+        setTheme={setTheme}
+        isDarkMode={isDarkMode}
       />
 
       {/* Main Tab Screen */}
