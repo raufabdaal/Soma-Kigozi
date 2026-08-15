@@ -3,6 +3,7 @@ import { TOPIC_1_EAST_AFRICA } from './topic1EastAfrica';
 import { TOPIC_2_CLIMATE_VEGETATION } from './topic2ClimateVegetation';
 import { TOPIC_3_RIVERS_LAKES } from './topic3RiversLakes';
 import { TOPIC_4_POPULATION_SETTLEMENT } from './topic4PopulationSettlement';
+import { TOPIC_5_RESOURCES_ECONOMICS } from './topic5ResourcesEconomics';
 
 export const SUBJECTS: SubjectMeta[] = [
   {
@@ -69,11 +70,16 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
   TOPIC_4_POPULATION_SETTLEMENT,
 
   // =========================================================================
-  // UNIT 5: THE PEOPLE OF EAST AFRICA & PRE-COLONIAL KINGDOMS
+  // PRIMARY 7 SOCIAL STUDIES (SST) - NCDC TOPIC 5: RESOURCES AND ECONOMIC ACTIVITIES IN EAST AFRICA
+  // =========================================================================
+  TOPIC_5_RESOURCES_ECONOMICS,
+
+  // =========================================================================
+  // UNIT 6: THE PEOPLE OF EAST AFRICA & PRE-COLONIAL KINGDOMS
   // =========================================================================
   {
-    id: 'sst-p7-u5',
-    unitNumber: 5,
+    id: 'sst-p7-u6',
+    unitNumber: 6,
     title: 'The People of East Africa & Early Migrations',
     term: 2,
     gradeLevel: 'P.7',
@@ -84,8 +90,8 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
     accentColor: '#ff9600',
     lessons: [
       {
-        id: 'sst-p7-u5-l1',
-        unitId: 'sst-p7-u5',
+        id: 'sst-p7-u6-l1',
+        unitId: 'sst-p7-u6',
         title: 'Major Ethnic Groups & Migration Origins',
         subtitle: 'Bantu, Nilotes, Cushites & Sudanic Peoples',
         gradeLevel: 'P.7',
@@ -166,8 +172,8 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
         ],
       },
       {
-        id: 'sst-p7-u5-l2',
-        unitId: 'sst-p7-u5',
+        id: 'sst-p7-u6-l2',
+        unitId: 'sst-p7-u6',
         title: 'Pre-Colonial Kingdoms & The Chwezi Civilization',
         subtitle: 'The Empire of Bunyoro-Kitara, Buganda & Ankole',
         gradeLevel: 'P.7',
@@ -218,11 +224,11 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
   },
 
   // =========================================================================
-  // UNIT 6: FOREIGN INFLUENCE & THE ROAD TO INDEPENDENCE (1962)
+  // UNIT 7: FOREIGN INFLUENCE & THE ROAD TO INDEPENDENCE (1962)
   // =========================================================================
   {
-    id: 'sst-p7-u6',
-    unitNumber: 6,
+    id: 'sst-p7-u7',
+    unitNumber: 7,
     title: 'Foreign Influence, The 1900 Buganda Agreement & Independence',
     term: 2,
     gradeLevel: 'P.7',
@@ -233,8 +239,8 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
     accentColor: '#22c55e',
     lessons: [
       {
-        id: 'sst-p7-u6-l1',
-        unitId: 'sst-p7-u6',
+        id: 'sst-p7-u7-l1',
+        unitId: 'sst-p7-u7',
         title: 'The 1900 Buganda Agreement',
         subtitle: 'Sir Harry Johnston, Land Division & Colonial Taxes',
         gradeLevel: 'P.7',
@@ -295,8 +301,8 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
         ],
       },
       {
-        id: 'sst-p7-u6-l2',
-        unitId: 'sst-p7-u6',
+        id: 'sst-p7-u7-l2',
+        unitId: 'sst-p7-u7',
         title: 'The Road to Independence (9th October 1962)',
         subtitle: 'National Heroes, Parties & National Symbols',
         gradeLevel: 'P.7',

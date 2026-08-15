@@ -881,6 +881,133 @@ export const LessonScreen: React.FC<LessonScreenProps> = ({
       );
     }
 
+    if (type === 'resources_classification_diagram') {
+      return (
+        <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2.5">
+          <div className="flex items-center justify-between text-xs font-black text-emerald-950">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              Classification of East African Resources
+            </span>
+            <span className="text-[10px] bg-emerald-200 text-emerald-950 font-black px-2 py-0.5 rounded-md">
+              Renewable vs. Non-renewable
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium">
+            <div className="p-2.5 rounded-xl bg-white border border-emerald-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-emerald-800 text-[11px] block">1. Renewable Resources (Regenerative)</span>
+              <p className="text-[11px] text-slate-600">• Can replace or replenish themselves naturally after use.</p>
+              <p className="text-[11px] text-slate-700 font-semibold">• Water, forests, fish, fertile soils, wildlife & solar energy.</p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-white border border-emerald-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-emerald-800 text-[11px] block">2. Non-Renewable (Exhaustible)</span>
+              <p className="text-[11px] text-slate-600">• Cannot be replaced once exhausted; took millions of years to form.</p>
+              <p className="text-[11px] text-slate-700 font-semibold">• Minerals (Copper, Limestone, Gold, Cobalt & Petroleum/Oil).</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (type === 'east_africa_agriculture_diagram') {
+      return (
+        <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2.5">
+          <div className="flex items-center justify-between text-xs font-black text-amber-950">
+            <span className="flex items-center gap-1.5">
+              <Compass className="w-4 h-4 text-amber-600" />
+              Agriculture: Systems, Livestock & Irrigation Schemes
+            </span>
+            <span className="text-[10px] bg-amber-200 text-amber-950 font-black px-2 py-0.5 rounded-md">
+              Economic Backbone
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-medium">
+            <div className="p-2.5 rounded-xl bg-white border border-amber-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-amber-800 text-[11px] block">Agricultural Systems</span>
+              <p className="text-[11px] text-slate-600">• <strong>Subsistence:</strong> Family consumption, simple hoes.</p>
+              <p className="text-[11px] text-slate-600">• <strong>Commercial:</strong> Production for sale on large scale.</p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-white border border-amber-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-amber-800 text-[11px] block">Livestock & Pastoralism</span>
+              <p className="text-[11px] text-slate-600">• <strong>Nomadic:</strong> Moving for water/pasture (Karamojong, Maasai).</p>
+              <p className="text-[11px] text-slate-600">• <strong>Ranching:</strong> Scientific beef farming on fenced land.</p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-white border border-amber-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-amber-800 text-[11px] block">Key Irrigation Schemes</span>
+              <p className="text-[11px] text-slate-600">• <strong>Doho (Butaleja):</strong> Rice farming</p>
+              <p className="text-[11px] text-slate-600">• <strong>Mubuku (Kasese):</strong> Vegetables/crops</p>
+              <p className="text-[11px] text-slate-600">• <strong>Mwea-Tebere (Kenya):</strong> Large rice scheme</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (type === 'fishing_and_mining_diagram') {
+      return (
+        <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-2.5">
+          <div className="flex items-center justify-between text-xs font-black text-blue-950">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-blue-600" />
+              Fishing & Major Minerals in East Africa
+            </span>
+            <span className="text-[10px] bg-blue-200 text-blue-950 font-black px-2 py-0.5 rounded-md">
+              Resource Extraction
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium">
+            <div className="p-2.5 rounded-xl bg-white border border-blue-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-blue-800 text-[11px] block">Fishing Industry</span>
+              <p className="text-[11px] text-slate-600">• <strong>Methods:</strong> Gill nets (modern) vs. hooks, baskets (traditional).</p>
+              <p className="text-[11px] text-slate-600">• <strong>Preservation:</strong> Smoking, sun-drying, salting, freezing.</p>
+              <p className="text-[11px] text-slate-600">• <strong>Hazards:</strong> Water hyacinth weed & illegal poison/nets.</p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-white border border-blue-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-blue-800 text-[11px] block">Major Minerals & Locations</span>
+              <p className="text-[11px] text-slate-600">• <strong>Limestone:</strong> Tororo & Hima (Cement making)</p>
+              <p className="text-[11px] text-slate-600">• <strong>Copper & Cobalt:</strong> Kilembe Mines in Kasese</p>
+              <p className="text-[11px] text-slate-600">• <strong>Soda Ash:</strong> Lake Magadi in Kenya (Glass)</p>
+              <p className="text-[11px] text-slate-600">• <strong>Petroleum:</strong> Albertine Graben (Hoima, Buliisa)</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (type === 'tourism_energy_trade_diagram') {
+      return (
+        <div className="p-4 rounded-2xl bg-teal-50/70 border border-teal-200 space-y-2.5">
+          <div className="flex items-center justify-between text-xs font-black text-teal-950">
+            <span className="flex items-center gap-1.5">
+              <Compass className="w-4 h-4 text-teal-600" />
+              Wildlife, Energy & International Trade
+            </span>
+            <span className="text-[10px] bg-teal-200 text-teal-950 font-black px-2 py-0.5 rounded-md">
+              Industry & Commerce
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-medium">
+            <div className="p-2.5 rounded-xl bg-white border border-teal-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-teal-800 text-[11px] block">Wildlife & Tourism</span>
+              <p className="text-[11px] text-slate-600">• <strong>National Parks:</strong> Strict conservation, no settlement.</p>
+              <p className="text-[11px] text-slate-600">• <strong>Threats:</strong> Poaching for ivory & human conflict.</p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-white border border-teal-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-teal-800 text-[11px] block">Power & Energy</span>
+              <p className="text-[11px] text-slate-600">• <strong>HEP:</strong> Nalubaale, Kiira, Bujagali, Karuma.</p>
+              <p className="text-[11px] text-slate-600">• <strong>Geothermal:</strong> Olkaria in Kenya.</p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-white border border-teal-100 text-slate-900 shadow-2xs space-y-1">
+              <span className="font-black text-teal-800 text-[11px] block">Trade & Industry</span>
+              <p className="text-[11px] text-slate-600">• <strong>Exports:</strong> Sent OUT (earn foreign money).</p>
+              <p className="text-[11px] text-slate-600">• <strong>Imports:</strong> Brought IN (costs money).</p>
+              <p className="text-[11px] text-slate-600">• <strong>Primary vs. Secondary vs. Assembly</strong></p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (type === 'map_elements_diagram') {
       return (
         <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
