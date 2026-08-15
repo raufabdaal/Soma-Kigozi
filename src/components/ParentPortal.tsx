@@ -7,12 +7,11 @@ import {
   Printer, 
   Download, 
   Share2, 
-  ShieldCheck, 
   CheckCircle, 
-  Clock, 
   Flame, 
-  Target, 
-  BookOpen
+  Trophy, 
+  BookOpen,
+  GraduationCap
 } from 'lucide-react';
 import { calculatePleProjection } from '../services/storageService';
 import { soundFx } from '../services/soundEffects';
@@ -25,7 +24,7 @@ interface ParentPortalProps {
 export const ParentPortal: React.FC<ParentPortalProps> = ({
   userStats,
 }) => {
-  const [activeCardTheme, setActiveCardTheme] = useState<'spotify_dark' | 'sunset_gold' | 'pearl_emerald'>('spotify_dark');
+  const [activeCardTheme, setActiveCardTheme] = useState<'slate' | 'navy' | 'emerald'>('slate');
 
   const projection = calculatePleProjection(userStats.currentMastery);
 
@@ -43,7 +42,7 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 space-y-6">
       
       {/* Header Card */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-7 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-slate-900 rounded-3xl p-6 sm:p-7 text-white shadow-md border-b-4 border-slate-950 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
@@ -66,14 +65,14 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
           onClick={handlePrint}
           className="bg-white hover:bg-slate-100 text-slate-900 px-4 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-95 whitespace-nowrap self-start md:self-center"
         >
-          <Printer className="w-4 h-4 text-indigo-600" />
+          <Printer className="w-4 h-4 text-blue-600" />
           Print Report Card
         </button>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
+        <div className="bg-white rounded-3xl p-4 border-2 border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-500">Mastery</span>
             <TrendingUp className="w-4 h-4 text-emerald-600" />
@@ -88,7 +87,7 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
           </span>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
+        <div className="bg-white rounded-3xl p-4 border-2 border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-500">PLE Forecast</span>
             <Award className="w-4 h-4 text-blue-600" />
@@ -103,7 +102,7 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
           </span>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
+        <div className="bg-white rounded-3xl p-4 border-2 border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-500">Study Streak</span>
             <Flame className="w-4 h-4 text-amber-500 fill-amber-400" />
@@ -118,7 +117,7 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
           </span>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
+        <div className="bg-white rounded-3xl p-4 border-2 border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-500">Tutor Savings</span>
             <DollarSign className="w-4 h-4 text-emerald-600" />
@@ -152,8 +151,8 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
 
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-heading font-black text-sm">
-              🏆
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center font-heading font-black text-sm">
+              <Trophy className="w-5 h-5 text-amber-600" />
             </div>
             <div>
               <span className="font-heading font-black text-sm text-slate-900 block">
@@ -175,15 +174,15 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
             Shareable Scholar Card
           </h3>
           <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-            {(['spotify_dark', 'sunset_gold', 'pearl_emerald'] as const).map((t) => (
+            {(['slate', 'navy', 'emerald'] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setActiveCardTheme(t)}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase cursor-pointer ${
+                className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase cursor-pointer ${
                   activeCardTheme === t ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
                 }`}
               >
-                {t.split('_')[0]}
+                {t}
               </button>
             ))}
           </div>
@@ -192,17 +191,17 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
         {/* Card Component */}
         <div
           className={`rounded-3xl p-6 text-white shadow-xl transition-all ${
-            activeCardTheme === 'spotify_dark'
-              ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950'
-              : activeCardTheme === 'sunset_gold'
-              ? 'bg-gradient-to-br from-amber-700 via-orange-600 to-rose-700'
-              : 'bg-gradient-to-br from-emerald-800 via-teal-900 to-slate-950'
+            activeCardTheme === 'slate'
+              ? 'bg-slate-900 border-2 border-slate-800'
+              : activeCardTheme === 'navy'
+              ? 'bg-blue-900 border-2 border-blue-800'
+              : 'bg-emerald-900 border-2 border-emerald-800'
           }`}
         >
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div>
               <span className="font-heading font-black text-sm tracking-wider uppercase text-amber-300">
-                SOMA SCHOLAR REPORT
+                OFFICIAL SCHOLAR REPORT
               </span>
               <p className="text-[10px] text-white/70 font-semibold">
                 Primary 7 NCDC Official Track
@@ -213,9 +212,9 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
             </span>
           </div>
 
-          <div className="py-5 text-center space-y-1">
+          <div className="py-5 text-center space-y-1.5">
             <div className="w-14 h-14 rounded-full bg-amber-400 text-slate-950 font-black text-xl flex items-center justify-center mx-auto shadow-md">
-              {userStats.studentName.charAt(0)}
+              <GraduationCap className="w-7 h-7 text-slate-950" />
             </div>
             <h4 className="font-heading font-black text-lg text-white">
               {userStats.studentName}
@@ -225,26 +224,26 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="p-2.5 rounded-xl bg-white/10 border border-white/10">
+          <div className="grid grid-cols-3 gap-2.5 text-center text-xs">
+            <div className="p-3 rounded-2xl bg-white/10 border border-white/10">
               <span className="text-[9px] uppercase font-bold text-white/60 block">Mastery</span>
               <span className="font-heading font-black text-base text-emerald-400">{userStats.currentMastery}%</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-white/10 border border-white/10">
+            <div className="p-3 rounded-2xl bg-white/10 border border-white/10">
               <span className="text-[9px] uppercase font-bold text-white/60 block">Streak</span>
               <span className="font-heading font-black text-base text-amber-400">{userStats.currentStreak}d</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-white/10 border border-white/10">
+            <div className="p-3 rounded-2xl bg-white/10 border border-white/10">
               <span className="text-[9px] uppercase font-bold text-white/60 block">Forecast</span>
               <span className="font-heading font-black text-base text-amber-300">Agg {projection.aggregate}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2.5 pt-2">
           <button
             onClick={handlePrint}
-            className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
             <Download className="w-4 h-4" />
             Save / Print Card
@@ -253,9 +252,8 @@ export const ParentPortal: React.FC<ParentPortalProps> = ({
             onClick={() => {
               soundFx.playClick();
               navigator.clipboard?.writeText(window.location.href);
-              alert('Link copied to clipboard!');
             }}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200"
+            className="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200"
           >
             <Share2 className="w-4 h-4" />
             Share

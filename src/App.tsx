@@ -4,9 +4,9 @@ import { CURRICULUM_UNITS } from './data/curriculumData';
 import { loadUserStats, saveUserStats } from './services/storageService';
 import { Navbar } from './components/Navbar';
 import { BottomNav, NavTab } from './components/BottomNav';
-import { OnboardingModal } from './components/OnboardingModal';
+import { OnboardingScreen } from './components/OnboardingScreen';
 import { StudentHome } from './components/StudentHome';
-import { LessonModal } from './components/LessonModal';
+import { LessonScreen } from './components/LessonScreen';
 import { ParentPortal } from './components/ParentPortal';
 import { OfflineManager } from './components/OfflineManager';
 import { PracticeArena } from './components/PracticeArena';
@@ -73,10 +73,35 @@ export default function App() {
     setShowOnboarding(false);
   };
 
+  // 1. FULL-SCREEN ONBOARDING FLOW
+  if (showOnboarding) {
+    return (
+      <OnboardingScreen
+        userStats={userStats}
+        onComplete={handleOnboardingComplete}
+        onClose={() => setShowOnboarding(false)}
+        isDevReopen={userStats.hasCompletedOnboarding}
+      />
+    );
+  }
+
+  // 2. FULL-SCREEN LESSON FLOW (Clean focus mode, no persistent tabs)
+  if (activeLesson) {
+    return (
+      <LessonScreen
+        lesson={activeLesson}
+        userStats={userStats}
+        onExit={() => setActiveLesson(null)}
+        onCompleteLesson={handleCompleteLesson}
+      />
+    );
+  }
+
+  // 3. MAIN BROWSING APPLICATION (Persistent Navbar & BottomNav)
   return (
     <div className="min-h-screen bg-[#f7f9fa] text-slate-900 flex flex-col font-sans selection:bg-amber-200">
       
-      {/* Top Minimal Uncluttered Navbar */}
+      {/* Top Header Navbar */}
       <Navbar
         userStats={userStats}
         activeSubject={activeSubject}
@@ -84,7 +109,7 @@ export default function App() {
         onNavigateHome={() => setActiveTab('study')}
       />
 
-      {/* Main Screen Content */}
+      {/* Main Tab Screen */}
       <main className="flex-1 w-full">
         {activeTab === 'study' && (
           <StudentHome
@@ -120,32 +145,12 @@ export default function App() {
         )}
       </main>
 
-      {/* Duolingo Persistent Bottom Navigation Bar */}
+      {/* Persistent Bottom Navigation Bar */}
       <BottomNav
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         completedLessonsCount={userStats.completedLessonIds.length}
       />
-
-      {/* Interactive Lesson Modal (Teach -> Practice -> Retain) */}
-      {activeLesson && (
-        <LessonModal
-          lesson={activeLesson}
-          userStats={userStats}
-          onClose={() => setActiveLesson(null)}
-          onCompleteLesson={handleCompleteLesson}
-        />
-      )}
-
-      {/* Initial Onboarding Modal */}
-      {showOnboarding && (
-        <OnboardingModal
-          userStats={userStats}
-          onComplete={handleOnboardingComplete}
-          onClose={() => setShowOnboarding(false)}
-          isDevReopen={userStats.hasCompletedOnboarding}
-        />
-      )}
     </div>
   );
 }

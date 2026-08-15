@@ -3,15 +3,17 @@ import { UserStats, Question, SubjectId } from '../types';
 import { CURRICULUM_UNITS, SUBJECTS } from '../data/curriculumData';
 import { 
   Zap, 
-  Flame, 
   RotateCcw, 
   CheckCircle2, 
   AlertCircle, 
   Trophy, 
   Timer, 
-  Sparkles, 
   ArrowRight,
-  BookOpen
+  Globe,
+  FlaskConical,
+  Calculator,
+  BookOpenCheck,
+  Check
 } from 'lucide-react';
 import { soundFx } from '../services/soundEffects';
 import confetti from 'canvas-confetti';
@@ -27,7 +29,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
   onUpdateStats,
   onBackToHome,
 }) => {
-  const [selectedSubject, setSelectedSubject] = useState<SubjectId>('math');
+  const [selectedSubject, setSelectedSubject] = useState<SubjectId>('sst');
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
@@ -35,6 +37,19 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [isSessionFinished, setIsSessionFinished] = useState(false);
+
+  const getSubjectIcon = (id: SubjectId) => {
+    switch (id) {
+      case 'sst':
+        return <Globe className="w-5 h-5 text-blue-500" />;
+      case 'science':
+        return <FlaskConical className="w-5 h-5 text-emerald-500" />;
+      case 'math':
+        return <Calculator className="w-5 h-5 text-amber-500" />;
+      case 'english':
+        return <BookOpenCheck className="w-5 h-5 text-rose-500" />;
+    }
+  };
 
   // Extract questions for rapid practice
   const practiceQuestions: Question[] = React.useMemo(() => {
@@ -104,41 +119,47 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+      
+      {/* Header Banner */}
+      <div className="bg-amber-500 rounded-3xl p-6 sm:p-7 text-white shadow-md border-b-4 border-amber-600 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-white/20 text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">
-              PLE Rapid Fire Sprint
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="bg-black/20 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-white/20">
+              PLE RAPID DRILL
             </span>
-            <span className="text-white/80 text-xs font-semibold">
-              Daily NCDC Mastery Boost
+            <span className="text-white/90 text-xs font-bold">
+              Speed & Problem Solving
             </span>
           </div>
-          <h1 className="font-heading font-black text-2xl sm:text-3xl">
-            Speed Training & Mock Drills
+          <h1 className="font-heading font-black text-xl sm:text-2xl text-white">
+            Timed Practice Drill
           </h1>
-          <p className="text-white/90 text-sm mt-1 max-w-lg leading-relaxed">
-            Strengthen your memory and quick problem-solving skills with timed NCDC question sets.
+          <p className="text-white/90 text-xs mt-1 max-w-lg font-medium">
+            5 quick UNEB examination questions to sharpen your recall and speed.
           </p>
         </div>
 
         <button
           onClick={onBackToHome}
-          className="bg-white/15 hover:bg-white/25 text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+          className="bg-white hover:bg-slate-50 text-slate-900 px-4 py-2 rounded-2xl text-xs font-black shadow-xs transition-colors cursor-pointer self-start md:self-center whitespace-nowrap"
         >
-          ← Return to Curriculum Map
+          ← Return to Trail
         </button>
       </div>
 
       {!isSessionActive ? (
-        /* Subject Picker and Start Sprint Card */
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
-          <h2 className="font-heading font-bold text-lg text-slate-900">
-            Select Subject for Rapid Sprint:
-          </h2>
+        /* Subject Picker Card */
+        <div className="bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 shadow-xs space-y-5">
+          <div>
+            <h2 className="font-heading font-black text-base text-slate-900">
+              Select Subject:
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">
+              Choose an NCDC core paper to practice
+            </p>
+          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {SUBJECTS.map((sub) => {
               const isSelected = selectedSubject === sub.id;
               return (
@@ -148,30 +169,46 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                     soundFx.playClick();
                     setSelectedSubject(sub.id);
                   }}
-                  className={`p-4 rounded-2xl border-2 text-left font-bold transition-all cursor-pointer ${
+                  className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between h-28 ${
                     isSelected
                       ? 'border-amber-500 bg-amber-50/80 text-amber-950 shadow-xs'
                       : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
                   }`}
                 >
-                  <span className="text-xs uppercase block text-slate-400 mb-1">
-                    {sub.ncdcCode}
-                  </span>
-                  <span className="text-sm block">{sub.name}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-2xs">
+                      {getSubjectIcon(sub.id)}
+                    </div>
+                    {isSelected && (
+                      <div className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <span className="font-heading font-black text-xs sm:text-sm block text-slate-900">
+                      {sub.name}
+                    </span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">
+                      {sub.ncdcCode}
+                    </span>
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <Timer className="w-5 h-5 text-amber-500" />
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center">
+                <Timer className="w-5 h-5 text-amber-600" />
+              </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block">
-                  Sprint Details
+                <span className="text-xs font-black text-slate-900 block">
+                  5 Questions • Speed Sprint
                 </span>
-                <span className="text-[11px] text-slate-500">
-                  5 Questions • +35 XP • +8 Enjuba Gems
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  Earn +35 XP and +8 Enjuba Gems
                 </span>
               </div>
             </div>
@@ -179,7 +216,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             <button
               id="start-sprint-btn"
               onClick={handleStartSprint}
-              className="btn-3d-amber px-6 py-2.5 rounded-xl text-white font-extrabold text-xs sm:text-sm cursor-pointer"
+              className="btn-duo-amber w-full sm:w-auto px-6 py-3 rounded-2xl text-xs font-black cursor-pointer shadow-sm"
             >
               Start Sprint Now
             </button>
@@ -187,45 +224,45 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
         </div>
       ) : isSessionFinished ? (
         /* Sprint Complete Summary */
-        <div className="bg-white rounded-3xl p-8 text-center border border-slate-200 shadow-lg space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
-            <Trophy className="w-10 h-10" />
+        <div className="bg-white rounded-3xl p-8 text-center border-2 border-slate-200 shadow-lg space-y-6">
+          <div className="w-16 h-16 rounded-3xl bg-amber-400 text-slate-950 flex items-center justify-center mx-auto shadow-md">
+            <Trophy className="w-8 h-8 stroke-[2.5]" />
           </div>
 
           <div>
             <h2 className="font-heading font-black text-2xl text-slate-900">
-              Sprint Finished!
+              Sprint Complete!
             </h2>
-            <p className="text-sm text-slate-600 mt-1">
-              You scored <span className="font-bold text-amber-700">{score} / {practiceQuestions.length}</span> correct!
+            <p className="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
+              You scored <span className="font-black text-amber-700">{score} of {practiceQuestions.length}</span> correct!
             </p>
           </div>
 
           <div className="flex justify-center gap-3">
             <button
               onClick={handleStartSprint}
-              className="btn-3d-slate px-5 py-2.5 rounded-xl text-slate-800 font-bold text-xs cursor-pointer flex items-center gap-1.5"
+              className="btn-duo-white px-5 py-3 rounded-2xl text-xs font-black cursor-pointer flex items-center gap-2"
             >
               <RotateCcw className="w-4 h-4" />
               Try Another Sprint
             </button>
             <button
               onClick={onBackToHome}
-              className="btn-3d-amber px-5 py-2.5 rounded-xl text-white font-bold text-xs cursor-pointer flex items-center gap-1.5"
+              className="btn-duo-green px-5 py-3 rounded-2xl text-xs font-black cursor-pointer flex items-center gap-2 shadow-sm"
             >
-              Return Home
+              Return to Trail
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       ) : (
         /* Active Rapid Fire Question */
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-lg space-y-6">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200 shadow-sm space-y-6">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-400">
               Question {currentIndex + 1} of {practiceQuestions.length}
             </span>
-            <span className="text-xs font-extrabold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+            <span className="text-xs font-black text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
               {currentQ.ncdcTopic}
             </span>
           </div>
@@ -235,7 +272,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
           </h3>
 
           {currentQ.type === 'multiple_choice' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-2.5">
               {currentQ.options.map((opt) => {
                 const isSelected = selectedOptionId === opt.id;
                 return (
@@ -243,41 +280,46 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                     key={opt.id}
                     onClick={() => !isAnswerChecked && setSelectedOptionId(opt.id)}
                     disabled={isAnswerChecked}
-                    className={`p-4 rounded-xl border-2 text-left font-bold text-sm transition-all cursor-pointer ${
+                    className={`p-4 rounded-2xl border-2 text-left font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-between ${
                       isSelected
-                        ? 'border-amber-500 bg-amber-50 text-amber-950'
+                        ? 'border-amber-500 bg-amber-50 text-amber-950 shadow-xs'
                         : 'border-slate-200 hover:border-slate-300 bg-white text-slate-800'
                     }`}
                   >
-                    {opt.text}
+                    <span>{opt.text}</span>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      isSelected ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300'
+                    }`}>
+                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                    </div>
                   </button>
                 );
               })}
             </div>
           ) : (
-            <div className="p-4 rounded-xl bg-slate-50 text-slate-700 text-sm">
-              <p className="font-semibold">{currentQ.explanation}</p>
+            <div className="p-4 rounded-2xl bg-slate-50 text-slate-700 text-xs font-medium">
+              <p>{currentQ.explanation}</p>
             </div>
           )}
 
           {isAnswerChecked && (
             <div
-              className={`p-4 rounded-2xl border flex items-center gap-3 ${
+              className={`p-4 rounded-2xl border-2 flex items-center gap-3 ${
                 isCorrect
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                  : 'bg-rose-50 border-rose-200 text-rose-900'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                  : 'bg-rose-50 border-rose-200 text-rose-950'
               }`}
             >
               {isCorrect ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
               ) : (
-                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                <AlertCircle className="w-6 h-6 text-rose-600 shrink-0" />
               )}
               <div className="text-xs">
-                <span className="font-bold block">
+                <span className="font-black block text-sm">
                   {isCorrect ? 'Correct!' : 'Incorrect'}
                 </span>
-                <span>{currentQ.explanation}</span>
+                <span className="font-medium text-slate-700">{currentQ.explanation}</span>
               </div>
             </div>
           )}
@@ -286,15 +328,16 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             {isAnswerChecked ? (
               <button
                 onClick={handleNext}
-                className="btn-3d-emerald px-6 py-2.5 rounded-xl text-white font-extrabold text-xs sm:text-sm cursor-pointer"
+                className="btn-duo-green w-full sm:w-auto px-7 py-3 rounded-2xl text-xs font-black cursor-pointer shadow-sm flex items-center justify-center gap-2"
               >
-                Next Question →
+                Next Question
+                <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
               <button
                 onClick={handleCheck}
                 disabled={!selectedOptionId && currentQ.type === 'multiple_choice'}
-                className="btn-3d-amber px-6 py-2.5 rounded-xl text-white font-extrabold text-xs sm:text-sm cursor-pointer disabled:opacity-50"
+                className="btn-duo-amber w-full sm:w-auto px-7 py-3 rounded-2xl text-xs font-black cursor-pointer shadow-sm disabled:opacity-50"
               >
                 Check Answer
               </button>
