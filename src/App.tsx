@@ -3,25 +3,19 @@ import { UserStats, LessonNode, SubjectId } from './types';
 import { CURRICULUM_UNITS } from './data/curriculumData';
 import { loadUserStats, saveUserStats } from './services/storageService';
 import { Navbar } from './components/Navbar';
-import { HamburgerDrawer } from './components/HamburgerDrawer';
+import { BottomNav, NavTab } from './components/BottomNav';
 import { OnboardingModal } from './components/OnboardingModal';
 import { StudentHome } from './components/StudentHome';
 import { LessonModal } from './components/LessonModal';
 import { ParentPortal } from './components/ParentPortal';
 import { OfflineManager } from './components/OfflineManager';
 import { PracticeArena } from './components/PracticeArena';
-import { KigoziAIChat } from './components/KigoziAIChat';
 
 export default function App() {
   const [userStats, setUserStats] = useState<UserStats>(() => loadUserStats());
-  const [activeTab, setActiveTab] = useState<'study' | 'practice' | 'parent' | 'offline'>('study');
+  const [activeTab, setActiveTab] = useState<NavTab>('study');
   const [activeSubject, setActiveSubject] = useState<SubjectId>(userStats.activeSubjectId || 'sst');
   const [activeLesson, setActiveLesson] = useState<LessonNode | null>(null);
-  const [showKigoziChat, setShowKigoziChat] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  
-  // Drawer and Onboarding states
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(!userStats.hasCompletedOnboarding);
 
   // Sync to local storage whenever userStats updates
@@ -81,31 +75,17 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f7f9fa] text-slate-900 flex flex-col font-sans selection:bg-amber-200">
-      {/* Top Universal Clean Navbar */}
+      
+      {/* Top Minimal Uncluttered Navbar */}
       <Navbar
         userStats={userStats}
-        onOpenDrawer={() => setIsDrawerOpen(true)}
-        activeTab={activeTab}
+        activeSubject={activeSubject}
+        setActiveSubject={setActiveSubject}
         onNavigateHome={() => setActiveTab('study')}
       />
 
-      {/* Hamburger Navigation Drawer */}
-      <HamburgerDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        userStats={userStats}
-        onUpdateStats={handleUpdateStats}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        activeSubject={activeSubject}
-        setActiveSubject={setActiveSubject}
-        onReopenOnboarding={() => setShowOnboarding(true)}
-        isMuted={isMuted}
-        setIsMuted={setIsMuted}
-      />
-
       {/* Main Screen Content */}
-      <main className="flex-1">
+      <main className="flex-1 w-full">
         {activeTab === 'study' && (
           <StudentHome
             userStats={userStats}
@@ -114,7 +94,6 @@ export default function App() {
             setActiveSubject={setActiveSubject}
             onSelectLesson={(lesson) => setActiveLesson(lesson)}
             onOpenPractice={() => setActiveTab('practice')}
-            onOpenKigoziChat={() => setShowKigoziChat(true)}
           />
         )}
 
@@ -141,6 +120,13 @@ export default function App() {
         )}
       </main>
 
+      {/* Duolingo Persistent Bottom Navigation Bar */}
+      <BottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        completedLessonsCount={userStats.completedLessonIds.length}
+      />
+
       {/* Interactive Lesson Modal (Teach -> Practice -> Retain) */}
       {activeLesson && (
         <LessonModal
@@ -151,15 +137,7 @@ export default function App() {
         />
       )}
 
-      {/* Kigozi AI Study Buddy Chat Popup */}
-      {showKigoziChat && (
-        <KigoziAIChat
-          onClose={() => setShowKigoziChat(false)}
-          gradeLevel={userStats.gradeLevel}
-        />
-      )}
-
-      {/* Role & Persona Onboarding Modal */}
+      {/* Initial Onboarding Modal */}
       {showOnboarding && (
         <OnboardingModal
           userStats={userStats}

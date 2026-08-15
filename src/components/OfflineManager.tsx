@@ -133,7 +133,7 @@ export const OfflineManager: React.FC<OfflineManagerProps> = ({
   ).reduce((acc, p) => acc + p.sizeMb, 0);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 space-y-6">
       {/* Header */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center gap-3">

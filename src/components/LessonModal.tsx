@@ -7,25 +7,20 @@ import {
 } from '../types';
 import { 
   X, 
-  Heart, 
-  Sparkles, 
   CheckCircle2, 
   AlertCircle, 
   ArrowRight, 
-  Bot, 
   Trophy, 
-  RotateCcw,
-  Flame,
-  HelpCircle,
-  BookOpen,
-  Check,
-  Lightbulb,
-  Compass,
-  MapPin,
-  Award
+  BookOpen, 
+  Check, 
+  Lightbulb, 
+  Compass, 
+  MapPin, 
+  Award,
+  Sparkles
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { soundFx, speakAloud } from '../services/soundEffects';
+import { soundFx } from '../services/soundEffects';
 
 interface LessonModalProps {
   lesson: LessonNode;
@@ -60,17 +55,12 @@ export const LessonModal: React.FC<LessonModalProps> = ({
   const [matchedPairs, setMatchedPairs] = useState<Record<string, string>>({});
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
   const [availableWords, setAvailableWords] = useState<string[]>([]);
-  const [tappedHotspotId, setTappedHotspotId] = useState<string | null>(null);
+  const [showHint, setShowHint] = useState(false);
 
   // Validation & Error tracking
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [mistakesCount, setMistakesCount] = useState(0);
-
-  // AI Tutor Hint state
-  const [aiHint, setAiHint] = useState<string | null>(null);
-  const [isLoadingAi, setIsLoadingAi] = useState(false);
-  const [showHintModal, setShowHintModal] = useState(false);
 
   const currentQ: Question | undefined = lesson.questions[questionIndex];
   const currentSlide: TeachSlide | undefined = teachSlides[teachSlideIndex];
@@ -82,9 +72,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
     setSelectedOptionId(null);
     setSelectedLeft(null);
     setMatchedPairs({});
-    setTappedHotspotId(null);
-    setAiHint(null);
-    setShowHintModal(false);
+    setShowHint(false);
 
     if (currentQ && currentQ.type === 'sentence_unscramble') {
       setSelectedWords([]);
@@ -106,7 +94,6 @@ export const LessonModal: React.FC<LessonModalProps> = ({
     if (teachSlideIndex < teachSlides.length - 1) {
       setTeachSlideIndex((prev) => prev + 1);
     } else {
-      // Transition from Teach to Guided Practice
       soundFx.playFanfare();
       setPhase('practice');
     }
@@ -127,8 +114,6 @@ export const LessonModal: React.FC<LessonModalProps> = ({
       const studentSentence = selectedWords.join(' ').trim().toLowerCase();
       const targetSentence = currentQ.correctSentence.trim().toLowerCase();
       correct = studentSentence === targetSentence;
-    } else if (currentQ.type === 'diagram_tap') {
-      correct = tappedHotspotId === currentQ.targetHotspotId;
     }
 
     setIsCorrect(correct);
@@ -147,40 +132,14 @@ export const LessonModal: React.FC<LessonModalProps> = ({
     if (questionIndex < lesson.questions.length - 1) {
       setQuestionIndex((prev) => prev + 1);
     } else {
-      // Complete lesson!
       soundFx.playFanfare();
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      confetti({ particleCount: 90, spread: 60, origin: { y: 0.6 } });
       setPhase('complete');
       const finalScore = Math.max(
         60,
         Math.round(((lesson.questions.length - mistakesCount) / lesson.questions.length) * 100)
       );
       onCompleteLesson(lesson.id, finalScore, lesson.xpReward, lesson.gemsReward);
-    }
-  };
-
-  // Request AI Tutor hint
-  const handleAskAiHint = async () => {
-    if (!currentQ) return;
-    setIsLoadingAi(true);
-    setShowHintModal(true);
-    try {
-      const response = await fetch('/api/ask-kigozi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: `In P.7 SST: "${currentQ.prompt}". What Socratic hint helps the student understand?`,
-          gradeLevel: 'P.7',
-          subject: 'sst',
-          studentName: userStats.studentName,
-        }),
-      });
-      const data = await response.json();
-      setAiHint(data.reply || currentQ.explanation);
-    } catch {
-      setAiHint(currentQ.explanation);
-    } finally {
-      setIsLoadingAi(false);
     }
   };
 
@@ -219,54 +178,46 @@ export const LessonModal: React.FC<LessonModalProps> = ({
   };
 
   // -------------------------------------------------------------
-  // RENDER VISUAL SCHEMATICS FOR TEACH SLIDES
+  // VISUAL SCHEMATIC RENDERER
   // -------------------------------------------------------------
   const renderVisualSchematic = (type?: string) => {
     if (type === 'rift_valley_diagram') {
       return (
-        <div className="p-4 rounded-2xl bg-gradient-to-b from-sky-50 to-amber-50/50 border-2 border-slate-200">
+        <div className="p-4 rounded-2xl bg-gradient-to-b from-sky-50 to-amber-50/40 border-2 border-slate-200">
           <div className="flex items-center justify-between text-xs font-black text-slate-700 mb-2">
             <span className="flex items-center gap-1.5">
               <Compass className="w-4 h-4 text-blue-600" />
-              Cross-Section: Tectonic Faulting & Escarpments
+              Cross-Section: Tectonic Faulting
             </span>
             <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
               Western Arm Graben
             </span>
           </div>
 
-          <div className="h-28 relative flex items-end justify-between px-4 py-2 bg-white rounded-xl border border-slate-200">
-            {/* Left Plateau / Escarpment */}
-            <div className="w-1/4 h-20 bg-emerald-600 rounded-t-lg relative flex flex-col items-center justify-center text-white text-[10px] font-black shadow-xs">
+          <div className="h-24 relative flex items-end justify-between px-3 py-2 bg-white rounded-xl border border-slate-200">
+            <div className="w-1/4 h-18 bg-emerald-600 rounded-t-lg flex flex-col items-center justify-center text-white text-[10px] font-black shadow-xs">
               <span>Plateau</span>
-              <span className="text-[8px] opacity-80">(Fort Portal)</span>
+              <span className="text-[8px] opacity-80">(Escarpment)</span>
             </div>
             
-            {/* Fault Line Arrow */}
             <div className="text-[10px] font-black text-rose-600 text-center animate-bounce">
               <span>⬇ Fault</span>
             </div>
 
-            {/* Sunken Valley Floor (Graben) with Lake */}
-            <div className="w-2/5 h-10 bg-blue-500 rounded-t-lg relative flex flex-col items-center justify-center text-white text-[10px] font-black shadow-xs">
-              <span>Rift Graben</span>
-              <span className="text-[8px] opacity-90">Lake Albert / Edward</span>
+            <div className="w-2/5 h-9 bg-blue-500 rounded-t-lg flex flex-col items-center justify-center text-white text-[10px] font-black shadow-xs">
+              <span>Valley Floor</span>
+              <span className="text-[8px] opacity-90">Lake Albert</span>
             </div>
 
-            {/* Fault Line Arrow */}
             <div className="text-[10px] font-black text-rose-600 text-center animate-bounce">
               <span>⬇ Fault</span>
             </div>
 
-            {/* Right Horst Mountain */}
-            <div className="w-1/4 h-24 bg-slate-700 rounded-t-lg relative flex flex-col items-center justify-center text-white text-[10px] font-black shadow-xs border-t-4 border-slate-100">
+            <div className="w-1/4 h-22 bg-slate-700 rounded-t-lg flex flex-col items-center justify-center text-white text-[10px] font-black shadow-xs border-t-4 border-slate-100">
               <span>Horst Block</span>
-              <span className="text-[8px] text-amber-300">Rwenzori (5,109m)</span>
+              <span className="text-[8px] text-amber-300">Rwenzori</span>
             </div>
           </div>
-          <p className="text-[11px] text-slate-600 font-semibold mt-2 text-center">
-            Tensional forces pulled the crust outward, dropping the valley graben between parallel fault lines.
-          </p>
         </div>
       );
     }
@@ -277,10 +228,10 @@ export const LessonModal: React.FC<LessonModalProps> = ({
           <div className="flex items-center justify-between text-xs font-black text-sky-900 mb-2">
             <span className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-sky-600" />
-              Nile River Flow Path (Jinja to Egypt)
+              Nile River Flow Path
             </span>
             <span className="text-[10px] bg-sky-200 text-sky-950 font-black px-2 py-0.5 rounded">
-              6,650 km Total
+              6,650 km
             </span>
           </div>
           <div className="grid grid-cols-4 gap-1.5 text-center text-[10px] font-black">
@@ -298,7 +249,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
             </div>
             <div className="p-2 rounded-xl bg-white border border-sky-200 text-slate-900 shadow-2xs">
               <span className="block text-sky-600 text-[9px]">4. White Nile</span>
-              Khartoum to Delta
+              Mediterranean
             </div>
           </div>
         </div>
@@ -308,21 +259,21 @@ export const LessonModal: React.FC<LessonModalProps> = ({
     if (type === 'independence_flag') {
       return (
         <div className="p-4 rounded-2xl bg-slate-900 text-white border-2 border-slate-800 flex items-center gap-4">
-          <div className="w-24 h-16 rounded-xl overflow-hidden border-2 border-white/30 flex flex-col shrink-0 shadow-md">
-            <div className="h-1/3 bg-black flex items-center justify-center" />
+          <div className="w-20 h-14 rounded-xl overflow-hidden border border-white/20 flex flex-col shrink-0 shadow-md">
+            <div className="h-1/3 bg-black" />
             <div className="h-1/3 bg-amber-400 flex items-center justify-center">
-              <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center text-[7px] text-slate-950 font-black">
+              <div className="w-3.5 h-3.5 rounded-full bg-white flex items-center justify-center text-[6px] text-slate-950 font-black">
                 🦩
               </div>
             </div>
-            <div className="h-1/3 bg-rose-600 flex items-center justify-center" />
+            <div className="h-1/3 bg-rose-600" />
           </div>
           <div className="text-xs space-y-0.5">
             <p className="font-heading font-black text-amber-400 text-sm">
               Sovereign Symbols of Uganda
             </p>
             <p className="text-[11px] text-slate-300">
-              <strong className="text-white">Black:</strong> African Heritage • <strong className="text-amber-300">Yellow:</strong> Tropical Sunshine • <strong className="text-rose-400">Red:</strong> Brotherhood.
+              <strong className="text-white">Black:</strong> People • <strong className="text-amber-300">Yellow:</strong> Sunshine • <strong className="text-rose-400">Red:</strong> Brotherhood.
             </p>
           </div>
         </div>
@@ -334,10 +285,10 @@ export const LessonModal: React.FC<LessonModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border-2 border-slate-200 overflow-hidden flex flex-col my-auto max-h-[92vh]">
+      <div className="bg-white rounded-3xl w-full max-w-xl shadow-2xl border-2 border-slate-200 overflow-hidden flex flex-col my-auto max-h-[92vh]">
         
         {/* Top Header Bar */}
-        <div className="p-4 sm:p-5 border-b-2 border-slate-100 flex items-center justify-between bg-slate-50">
+        <div className="p-4 border-b-2 border-slate-100 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3 flex-1 pr-4">
             <button
               onClick={onClose}
@@ -353,22 +304,16 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                   ? 'bg-blue-100 text-blue-900 border border-blue-200' 
                   : 'bg-emerald-100 text-emerald-900 border border-emerald-200'
               }`}>
-                {phase === 'teach' ? 'Step 1: Teach & Learn' : phase === 'practice' ? 'Step 2: Guided Practice' : 'Mastery Achieved'}
+                {phase === 'teach' ? 'Teach' : phase === 'practice' ? 'Practice' : 'Mastered'}
               </span>
               <span className="font-heading font-bold text-xs sm:text-sm text-slate-900 truncate">
                 {lesson.title}
               </span>
             </div>
           </div>
-
-          {/* Hearts counter */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-600 font-black text-xs">
-            <Heart className="w-4 h-4 fill-rose-500" />
-            <span>{userStats.hearts}</span>
-          </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Top Progress Bar */}
         <div className="w-full bg-slate-100 h-2">
           {phase === 'teach' && (
             <div
@@ -388,22 +333,19 @@ export const LessonModal: React.FC<LessonModalProps> = ({
         </div>
 
         {/* ========================================================= */}
-        {/* PHASE 1: TEACH & LEARN (CONCEPT FIRST) */}
+        {/* PHASE 1: TEACH & LEARN */}
         {/* ========================================================= */}
         {phase === 'teach' && currentSlide && (
-          <div className="p-5 sm:p-7 space-y-5 overflow-y-auto flex-1">
+          <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-blue-600 flex items-center gap-1">
                 <BookOpen className="w-3.5 h-3.5" />
                 Concept {teachSlideIndex + 1} of {teachSlides.length}
               </span>
-              <span className="text-[11px] font-bold text-slate-400">
-                Primary 7 NCDC Social Studies
-              </span>
             </div>
 
             <div>
-              <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900 leading-tight">
+              <h2 className="font-heading font-black text-xl text-slate-900 leading-tight">
                 {currentSlide.conceptHeading}
               </h2>
               <p className="text-xs sm:text-sm text-slate-700 mt-2 whitespace-pre-line leading-relaxed font-medium">
@@ -416,11 +358,11 @@ export const LessonModal: React.FC<LessonModalProps> = ({
 
             {/* Key Bullets */}
             {currentSlide.bullets && currentSlide.bullets.length > 0 && (
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
-                  Core UNEB High-Frequency Facts:
+                  Core UNEB Facts:
                 </span>
-                <ul className="space-y-1.5 text-xs text-slate-800 font-semibold">
+                <ul className="space-y-1 text-xs text-slate-800 font-semibold">
                   {currentSlide.bullets.map((b, idx) => (
                     <li key={idx} className="flex items-start gap-2">
                       <Check className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0 stroke-[3]" />
@@ -432,11 +374,11 @@ export const LessonModal: React.FC<LessonModalProps> = ({
             )}
 
             {/* PLE Exam Tip Box */}
-            <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-200 flex items-start gap-3">
-              <Lightbulb className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-200 flex items-start gap-2.5">
+              <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <span className="text-[10px] font-black uppercase text-amber-900 tracking-wide block">
-                  PLE Distinction Exam Tip
+                  PLE Exam Tip
                 </span>
                 <p className="text-xs text-amber-950 font-bold mt-0.5 leading-snug">
                   {currentSlide.pleExamTip}
@@ -444,9 +386,9 @@ export const LessonModal: React.FC<LessonModalProps> = ({
               </div>
             </div>
 
-            {/* Interactive Micro-Check (Ensure Retention) */}
+            {/* Quick Micro-Check */}
             {currentSlide.quickCheck && (
-              <div className="p-4 rounded-2xl bg-blue-50/70 border-2 border-blue-200 space-y-3">
+              <div className="p-3.5 rounded-2xl bg-blue-50/70 border-2 border-blue-200 space-y-2.5">
                 <span className="text-[10px] font-black uppercase text-blue-800 tracking-wide block">
                   Micro-Checkpoint: Test Your Understanding
                 </span>
@@ -468,10 +410,10 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                           if (isCorrectOption) soundFx.playCorrect();
                           else soundFx.playWrong();
                         }}
-                        className={`p-3 rounded-xl border-2 text-left text-xs font-bold transition-all cursor-pointer ${
+                        className={`p-2.5 rounded-xl border-2 text-left text-xs font-bold transition-all cursor-pointer ${
                           !teachMicroChecked
                             ? isSelected
-                              ? 'border-blue-500 bg-white shadow-xs text-blue-950'
+                              ? 'border-blue-500 bg-white text-blue-950'
                               : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
                             : isCorrectOption
                             ? 'border-emerald-500 bg-emerald-50 text-emerald-950'
@@ -497,33 +439,38 @@ export const LessonModal: React.FC<LessonModalProps> = ({
         )}
 
         {/* ========================================================= */}
-        {/* PHASE 2: GUIDED INTERACTIVE PRACTICE */}
+        {/* PHASE 2: GUIDED PRACTICE */}
         {/* ========================================================= */}
         {phase === 'practice' && currentQ && (
-          <div className="p-5 sm:p-7 space-y-5 overflow-y-auto flex-1">
+          <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-emerald-600">
-                Exercise {questionIndex + 1} of {lesson.questions.length} • {currentQ.ncdcTopic}
+                Exercise {questionIndex + 1} of {lesson.questions.length}
               </span>
               <button
-                onClick={handleAskAiHint}
-                className="text-xs font-black text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-3 py-1 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                onClick={() => {
+                  soundFx.playClick();
+                  setShowHint(!showHint);
+                }}
+                className="text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-xl flex items-center gap-1 cursor-pointer"
               >
-                <Bot className="w-3.5 h-3.5" />
-                Ask Kigozi Hint
+                <Lightbulb className="w-3.5 h-3.5" />
+                <span>{showHint ? 'Hide Hint' : 'Hint'}</span>
               </button>
             </div>
 
+            {/* Hint Box */}
+            {showHint && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 text-xs font-semibold animate-fadeIn">
+                💡 {currentQ.explanation}
+              </div>
+            )}
+
             {/* Prompt */}
             <div>
-              <h3 className="font-heading font-black text-lg sm:text-xl text-slate-900 leading-snug">
+              <h3 className="font-heading font-black text-lg text-slate-900 leading-snug">
                 {currentQ.prompt}
               </h3>
-              {currentQ.ugandanContext && (
-                <span className="inline-block mt-1 text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
-                  🇺🇬 {currentQ.ugandanContext}
-                </span>
-              )}
             </div>
 
             {/* MULTIPLE CHOICE */}
@@ -539,20 +486,13 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                         soundFx.playClick();
                         setSelectedOptionId(opt.id);
                       }}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all font-bold text-xs sm:text-sm cursor-pointer flex items-center justify-between ${
+                      className={`p-3.5 rounded-2xl border-2 text-left transition-all font-bold text-xs sm:text-sm cursor-pointer flex items-center justify-between ${
                         isSelected
                           ? 'border-emerald-500 bg-emerald-50/80 text-emerald-950 shadow-xs'
                           : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800'
                       }`}
                     >
-                      <div>
-                        <span>{opt.text}</span>
-                        {opt.sublabel && isAnswerChecked && (
-                          <span className="block text-[11px] font-semibold text-emerald-700 mt-0.5">
-                            {opt.sublabel}
-                          </span>
-                        )}
-                      </div>
+                      <span>{opt.text}</span>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
                         isSelected ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300'
                       }`}>
@@ -566,12 +506,11 @@ export const LessonModal: React.FC<LessonModalProps> = ({
 
             {/* SENTENCE UNSCRAMBLE */}
             {currentQ.type === 'sentence_unscramble' && (
-              <div className="space-y-4">
-                {/* Target drop line */}
-                <div className="min-h-16 p-3 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-wrap gap-2 items-center">
+              <div className="space-y-3">
+                <div className="min-h-14 p-3 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-wrap gap-2 items-center">
                   {selectedWords.length === 0 && (
                     <span className="text-xs text-slate-400 font-medium italic">
-                      Tap words below to construct the sentence...
+                      Tap words below to build the sentence...
                     </span>
                   )}
                   {selectedWords.map((word, idx) => (
@@ -579,21 +518,20 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                       key={idx}
                       disabled={isAnswerChecked}
                       onClick={() => handleDeselectWord(word, idx)}
-                      className="btn-duo-green px-3.5 py-2 rounded-xl text-xs font-black cursor-pointer shadow-xs"
+                      className="btn-duo-green px-3 py-1.5 rounded-xl text-xs font-black cursor-pointer shadow-xs"
                     >
                       {word}
                     </button>
                   ))}
                 </div>
 
-                {/* Available word pool */}
                 <div className="flex flex-wrap gap-2">
                   {availableWords.map((word, idx) => (
                     <button
                       key={idx}
                       disabled={isAnswerChecked}
                       onClick={() => handleSelectWord(word, idx)}
-                      className="btn-duo-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
+                      className="btn-duo-white px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer"
                     >
                       {word}
                     </button>
@@ -604,11 +542,11 @@ export const LessonModal: React.FC<LessonModalProps> = ({
 
             {/* DRAG DROP PAIRING */}
             {currentQ.type === 'drag_drop_match' && (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <span className="text-xs text-slate-500 font-bold block">
-                  Tap an item on the left, then tap its matching pair on the right:
+                  Tap an item on the left, then tap its match on the right:
                 </span>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-2">
                     {currentQ.pairs.map((p) => {
                       const isMatched = !!matchedPairs[p.left];
@@ -618,7 +556,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                           key={p.id}
                           disabled={isAnswerChecked || isMatched}
                           onClick={() => handleSelectPairLeft(p.left)}
-                          className={`w-full p-3 rounded-xl border-2 text-left text-xs font-bold transition-all cursor-pointer ${
+                          className={`w-full p-2.5 rounded-xl border-2 text-left text-xs font-bold transition-all cursor-pointer ${
                             isMatched
                               ? 'border-emerald-400 bg-emerald-50 text-emerald-800 opacity-60'
                               : isSelected
@@ -640,7 +578,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                           key={p.id}
                           disabled={isAnswerChecked || isPaired}
                           onClick={() => handleSelectPairRight(p.right)}
-                          className={`w-full p-3 rounded-xl border-2 text-left text-xs font-bold transition-all cursor-pointer ${
+                          className={`w-full p-2.5 rounded-xl border-2 text-left text-xs font-bold transition-all cursor-pointer ${
                             isPaired
                               ? 'border-emerald-400 bg-emerald-50 text-emerald-800 opacity-60'
                               : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800'
@@ -658,44 +596,40 @@ export const LessonModal: React.FC<LessonModalProps> = ({
         )}
 
         {/* ========================================================= */}
-        {/* PHASE 3: LESSON COMPLETE & RETENTION CARD */}
+        {/* PHASE 3: LESSON COMPLETE */}
         {/* ========================================================= */}
         {phase === 'complete' && (
-          <div className="p-6 sm:p-8 space-y-6 text-center overflow-y-auto flex-1">
-            <div className="w-16 h-16 rounded-3xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-2xl mx-auto shadow-lg shadow-amber-400/30">
-              <Trophy className="w-8 h-8" />
+          <div className="p-6 sm:p-8 space-y-5 text-center overflow-y-auto flex-1">
+            <div className="w-14 h-14 rounded-3xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-2xl mx-auto shadow-lg shadow-amber-400/30">
+              <Trophy className="w-7 h-7" />
             </div>
 
             <div>
-              <h2 className="font-heading font-black text-2xl sm:text-3xl text-slate-900">
-                Lesson Mastered!
+              <h2 className="font-heading font-black text-2xl text-slate-900">
+                Lesson Complete!
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                You just locked in high-yield Primary 7 Social Studies knowledge.
+              <p className="text-xs text-slate-600 mt-1">
+                You just locked in Primary 7 Social Studies knowledge.
               </p>
             </div>
 
-            {/* Score & Rewards Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-200 text-center">
+            {/* Rewards Stats */}
+            <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-200 text-center">
                 <span className="text-[10px] font-black uppercase text-emerald-800 block">XP Earned</span>
-                <span className="font-heading font-black text-xl text-emerald-900">+{lesson.xpReward}</span>
+                <span className="font-heading font-black text-lg text-emerald-900">+{lesson.xpReward}</span>
               </div>
-              <div className="p-4 rounded-2xl bg-blue-50 border-2 border-blue-200 text-center">
-                <span className="text-[10px] font-black uppercase text-blue-800 block">Enjuba Gems</span>
-                <span className="font-heading font-black text-xl text-blue-900">+{lesson.gemsReward}</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-200 text-center">
-                <span className="text-[10px] font-black uppercase text-amber-800 block">Streak</span>
-                <span className="font-heading font-black text-xl text-amber-900">{userStats.currentStreak + 1} Days</span>
+              <div className="p-3.5 rounded-2xl bg-blue-50 border-2 border-blue-200 text-center">
+                <span className="text-[10px] font-black uppercase text-blue-800 block">Gems</span>
+                <span className="font-heading font-black text-lg text-blue-900">+{lesson.gemsReward}</span>
               </div>
             </div>
 
             {/* Key PLE Retention Takeaway */}
-            <div className="p-5 rounded-2xl bg-slate-900 text-white text-left space-y-2">
+            <div className="p-4 rounded-2xl bg-slate-900 text-white text-left space-y-1.5">
               <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                 <Award className="w-3.5 h-3.5" />
-                Key Memory Retention Fact for PLE:
+                Key Fact for PLE:
               </span>
               <p className="text-xs text-slate-200 font-semibold leading-relaxed">
                 {lesson.teachSlides?.[0]?.pleExamTip || 'Consistent practice guarantees Aggregate 4 distinction in Primary 7 UNEB national exams.'}
@@ -705,10 +639,10 @@ export const LessonModal: React.FC<LessonModalProps> = ({
             <div className="pt-2">
               <button
                 onClick={onClose}
-                className="btn-duo-green w-full py-4 rounded-2xl text-base font-black flex items-center justify-center gap-2"
+                className="btn-duo-green w-full py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2"
               >
-                Return to Curriculum Trail
-                <ArrowRight className="w-5 h-5" />
+                Continue Trail
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -718,22 +652,22 @@ export const LessonModal: React.FC<LessonModalProps> = ({
         {/* BOTTOM ACTION BAR */}
         {/* ========================================================= */}
         {phase === 'teach' && (
-          <div className="p-4 sm:p-5 border-t-2 border-slate-100 bg-white flex items-center justify-between">
+          <div className="p-4 border-t-2 border-slate-100 bg-white flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500">
-              Slide {teachSlideIndex + 1} of {teachSlides.length}
+              {teachSlideIndex + 1} of {teachSlides.length}
             </span>
             <button
               onClick={handleNextTeachSlide}
-              className="btn-duo-blue px-8 py-3 rounded-2xl text-xs sm:text-sm font-black flex items-center gap-2"
+              className="btn-duo-blue px-6 py-2.5 rounded-2xl text-xs font-black flex items-center gap-2"
             >
-              {teachSlideIndex < teachSlides.length - 1 ? 'Next Slide' : 'Start Practice'}
+              {teachSlideIndex < teachSlides.length - 1 ? 'Next' : 'Start Practice'}
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {phase === 'practice' && (
-          <div className={`p-4 sm:p-5 border-t-2 flex flex-col sm:flex-row items-center justify-between gap-3 ${
+          <div className={`p-4 border-t-2 flex flex-col sm:flex-row items-center justify-between gap-3 ${
             isAnswerChecked
               ? isCorrect
                 ? 'bg-emerald-50 border-emerald-200'
@@ -741,24 +675,24 @@ export const LessonModal: React.FC<LessonModalProps> = ({
               : 'bg-white border-slate-100'
           }`}>
             {isAnswerChecked ? (
-              <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="flex items-center gap-2.5 w-full sm:w-auto">
                 {isCorrect ? (
-                  <CheckCircle2 className="w-7 h-7 text-emerald-600 shrink-0" />
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
                 ) : (
-                  <AlertCircle className="w-7 h-7 text-rose-600 shrink-0" />
+                  <AlertCircle className="w-6 h-6 text-rose-600 shrink-0" />
                 )}
                 <div>
-                  <h4 className={`font-heading font-black text-sm ${isCorrect ? 'text-emerald-950' : 'text-rose-950'}`}>
-                    {isCorrect ? 'Superb! Distinction Standard' : 'Not quite right yet'}
+                  <h4 className={`font-heading font-black text-xs sm:text-sm ${isCorrect ? 'text-emerald-950' : 'text-rose-950'}`}>
+                    {isCorrect ? 'Correct!' : 'Incorrect'}
                   </h4>
-                  <p className="text-[11px] text-slate-700 font-medium">
+                  <p className="text-[11px] text-slate-700 font-medium line-clamp-2">
                     {currentQ?.explanation}
                   </p>
                 </div>
               </div>
             ) : (
-              <span className="text-xs font-bold text-slate-400">
-                Select your answer to verify
+              <span className="text-xs font-bold text-slate-400 hidden sm:inline">
+                Select your answer
               </span>
             )}
 
@@ -770,14 +704,14 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                     (currentQ?.type === 'sentence_unscramble' && selectedWords.length === 0)
                   }
                   onClick={handleCheckAnswer}
-                  className="btn-duo-green w-full sm:w-auto px-8 py-3 rounded-2xl text-xs sm:text-sm font-black"
+                  className="btn-duo-green w-full sm:w-auto px-6 py-2.5 rounded-2xl text-xs font-black"
                 >
-                  Check Answer
+                  Check
                 </button>
               ) : (
                 <button
                   onClick={handleNextQuestion}
-                  className={`w-full sm:w-auto px-8 py-3 rounded-2xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 ${
+                  className={`w-full sm:w-auto px-6 py-2.5 rounded-2xl text-xs font-black flex items-center justify-center gap-2 ${
                     isCorrect ? 'btn-duo-green' : 'btn-duo-red'
                   }`}
                 >

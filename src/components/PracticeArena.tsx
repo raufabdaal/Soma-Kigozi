@@ -103,7 +103,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
         <div>

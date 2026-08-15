@@ -1,80 +1,106 @@
-import React from 'react';
-import { UserStats } from '../types';
-import { 
-  Flame, 
-  Sparkles, 
-  Heart, 
-  Menu,
-  GraduationCap,
-  Users
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { UserStats, SubjectId } from '../types';
+import { SUBJECTS } from '../data/curriculumData';
+import { Flame, Sparkles, ChevronDown, Check } from 'lucide-react';
 import { soundFx } from '../services/soundEffects';
 
 interface NavbarProps {
   userStats: UserStats;
-  onOpenDrawer: () => void;
-  activeTab: 'study' | 'practice' | 'parent' | 'offline';
+  activeSubject: SubjectId;
+  setActiveSubject: (subject: SubjectId) => void;
   onNavigateHome: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   userStats,
-  onOpenDrawer,
-  activeTab,
+  activeSubject,
+  setActiveSubject,
   onNavigateHome,
 }) => {
+  const [showSubjectMenu, setShowSubjectMenu] = useState(false);
+  const currentSubject = SUBJECTS.find((s) => s.id === activeSubject) || SUBJECTS[0];
+
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-2 border-slate-200 shadow-xs">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b-2 border-slate-200 shadow-xs">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         
-        {/* Left: Clean Brand Logo & Locked Pilot Track */}
-        <div className="flex items-center gap-3">
+        {/* Left: Clean Minimal Brand & Subject Selector */}
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             id="nav-brand-logo"
             onClick={() => {
               soundFx.playClick();
               onNavigateHome();
             }}
-            className="flex items-center gap-2.5 group cursor-pointer text-left focus:outline-none"
+            className="flex items-center gap-2 group cursor-pointer focus:outline-none"
           >
-            <div className="w-10 h-10 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-lg shadow-sm border-2 border-amber-500 group-hover:scale-105 transition-transform">
-              🇺🇬
+            <div className="w-9 h-9 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-heading font-black text-lg shadow-sm border-b-3 border-emerald-600 group-hover:scale-105 transition-transform">
+              S
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-heading font-black text-xl tracking-tight text-slate-900">
-                  SOMA
-                </span>
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                  NCDC P.7
-                </span>
-              </div>
-              <p className="text-[10px] font-bold text-slate-400 hidden sm:block">
-                Ugandan Primary Ecosystem
-              </p>
-            </div>
+            <span className="font-heading font-black text-xl tracking-tight text-slate-900">
+              SOMA
+            </span>
           </button>
 
-          {/* Active Context Chip */}
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700">
-            {activeTab === 'parent' ? (
+          {/* Subject Switcher Pill */}
+          <div className="relative">
+            <button
+              id="nav-subject-selector-btn"
+              onClick={() => {
+                soundFx.playClick();
+                setShowSubjectMenu(!showSubjectMenu);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-heading font-extrabold text-slate-800 transition-colors cursor-pointer"
+            >
+              <span>{currentSubject.name}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform ${showSubjectMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Subject Selector Dropdown */}
+            {showSubjectMenu && (
               <>
-                <Users className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Parent Portal View</span>
-              </>
-            ) : (
-              <>
-                <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
-                <span>Primary 7 • Social Studies (SST)</span>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowSubjectMenu(false)}
+                />
+                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl border-2 border-slate-200 shadow-xl p-2 z-50 space-y-1">
+                  <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    Select P.7 Subject
+                  </div>
+                  {SUBJECTS.map((subj) => {
+                    const isSelected = subj.id === activeSubject;
+                    return (
+                      <button
+                        key={subj.id}
+                        onClick={() => {
+                          soundFx.playClick();
+                          setActiveSubject(subj.id);
+                          setShowSubjectMenu(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                            : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-blue-500" />
+                          <span>{subj.name}</span>
+                        </div>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 stroke-[3]" />}
+                      </button>
+                    );
+                  })}
+                </div>
               </>
             )}
           </div>
         </div>
 
-        {/* Right: Gamification Badges & Hamburger Trigger */}
+        {/* Right: Only Essential Gamification Metrics (Streak & Gems) */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* Streak Chip */}
+          {/* Streak Flame */}
           <div
             id="nav-streak-indicator"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-amber-50 border-2 border-amber-200 text-amber-900 font-extrabold text-xs sm:text-sm shadow-xs select-none"
@@ -84,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>{userStats.currentStreak}</span>
           </div>
 
-          {/* Enjuba Gems Chip */}
+          {/* Enjuba Gems */}
           <div
             id="nav-gems-indicator"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-blue-50 border-2 border-blue-200 text-blue-900 font-extrabold text-xs sm:text-sm shadow-xs select-none"
@@ -94,28 +120,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>{userStats.enjubaGems}</span>
           </div>
 
-          {/* Energy Hearts Chip */}
-          <div
-            id="nav-hearts-indicator"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-rose-50 border-2 border-rose-200 text-rose-900 font-extrabold text-xs sm:text-sm shadow-xs select-none"
-            title={`${userStats.hearts} of ${userStats.maxHearts} Hearts`}
-          >
-            <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
-            <span>{userStats.hearts}</span>
-          </div>
-
-          {/* Hamburger Menu Trigger */}
-          <button
-            id="nav-hamburger-btn"
-            onClick={() => {
-              soundFx.playClick();
-              onOpenDrawer();
-            }}
-            className="btn-duo-white p-2.5 rounded-2xl flex items-center justify-center cursor-pointer text-slate-700 hover:text-slate-950"
-            title="Open Navigation Menu"
-          >
-            <Menu className="w-5 h-5 stroke-[2.5]" />
-          </button>
         </div>
 
       </div>
