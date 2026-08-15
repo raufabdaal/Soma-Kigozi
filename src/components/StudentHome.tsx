@@ -130,7 +130,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                     
                     {/* SOLID 3D DUOLINGO UNIT BANNER */}
                     <div
-                      className={`rounded-3xl p-5 sm:p-6 text-white ${currentTheme.bannerBg} border-b-4 ${currentTheme.bannerBorder} shadow-sm mb-8 transition-transform select-none`}
+                      className={`rounded-3xl p-5 sm:p-6 text-white ${currentTheme.bannerBg} border-b-4 ${currentTheme.bannerBorder} shadow-sm mb-12 transition-transform select-none`}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div>
@@ -162,7 +162,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                     </div>
 
                     {/* DUOLINGO WINDING STEPPING STONE NODES */}
-                    <div className="flex flex-col items-center space-y-9 relative py-2">
+                    <div className="flex flex-col items-center space-y-12 sm:space-y-14 relative pt-4 pb-6">
                       
                       {unitLessons.map((lesson, idx) => {
                         const isCompleted = userStats.completedLessonIds.includes(lesson.id);
@@ -174,25 +174,11 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                         const offsetPattern = [0, -48, 48, -40, 40];
                         const xOffset = offsetPattern[idx % offsetPattern.length];
 
-                        // Subtle encouragement mascot near the active node
-                        const showActiveMascot = isCurrent && idx % 2 === 0;
-
                         return (
                           <div
                             key={lesson.id}
                             className="w-full flex items-center justify-center relative transition-transform duration-200"
                           >
-                            {/* In-trail Mascot Encouragement */}
-                            {showActiveMascot && (
-                              <div className="absolute -left-4 sm:left-0 top-0 hidden sm:block pointer-events-none select-none z-10">
-                                <CraneMascot
-                                  mood="studying"
-                                  size="sm"
-                                  speechText="Akatono katono! Let's start!"
-                                />
-                              </div>
-                            )}
-
                             {/* Stepping Stone Center Node */}
                             <div
                               className="flex flex-col items-center relative"
@@ -200,9 +186,9 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                                 transform: `translateX(${xOffset}px)`,
                               }}
                             >
-                              {/* Pulsing "START" Tooltip above current node */}
+                              {/* Pulsing "START" Tooltip above current node with ample clearance */}
                               {isCurrent && (
-                                <div className="absolute -top-10 z-20 flex flex-col items-center pointer-events-none animate-pulse">
+                                <div className="absolute -top-10 z-20 flex flex-col items-center pointer-events-none animate-bounce">
                                   <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[11px] font-black uppercase px-3.5 py-1 rounded-full shadow-lg flex items-center gap-1.5 border border-slate-700 dark:border-slate-300">
                                     <Sparkles className="w-3 h-3 text-amber-400 fill-amber-400" />
                                     <span>START</span>

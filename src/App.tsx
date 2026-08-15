@@ -130,6 +130,7 @@ export default function App() {
 
         {activeTab === 'practice' && (
           <PracticeArena
+            activeSubject={activeSubject}
             userStats={userStats}
             onUpdateStats={handleUpdateStats}
             onBackToHome={() => setActiveTab('study')}

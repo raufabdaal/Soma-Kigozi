@@ -1,4 +1,8 @@
 import { CurriculumUnit, SubjectMeta, UserStats, DailyQuest } from '../types';
+import { TOPIC_1_EAST_AFRICA } from './topic1EastAfrica';
+import { TOPIC_2_CLIMATE_VEGETATION } from './topic2ClimateVegetation';
+import { TOPIC_3_RIVERS_LAKES } from './topic3RiversLakes';
+import { TOPIC_4_POPULATION_SETTLEMENT } from './topic4PopulationSettlement';
 
 export const SUBJECTS: SubjectMeta[] = [
   {
@@ -45,305 +49,33 @@ export const SUBJECTS: SubjectMeta[] = [
 
 export const CURRICULUM_UNITS: CurriculumUnit[] = [
   // =========================================================================
-  // PRIMARY 7 SOCIAL STUDIES (SST) - PILOT FLAGSHIP CURRICULUM
+  // PRIMARY 7 SOCIAL STUDIES (SST) - NCDC TOPIC 1: LOCATION, SIZE AND RELIEF OF EAST AFRICA
   // =========================================================================
-  {
-    id: 'sst-p7-u1',
-    unitNumber: 1,
-    title: 'Location, Physical Features & Drainage of East Africa',
-    term: 1,
-    gradeLevel: 'P.7',
-    subjectId: 'sst',
-    description: 'Master the formation of the Great East African Rift Valley, block vs volcanic mountains, Lake Victoria (Nalubaale) downwarping, and the journey of the River Nile to the Mediterranean.',
-    bannerColor: 'from-sky-600 via-blue-700 to-indigo-900',
-    themeGradient: 'from-blue-500 to-indigo-600',
-    accentColor: '#1cb0f6',
-    lessons: [
-      {
-        id: 'sst-p7-l1',
-        unitId: 'sst-p7-u1',
-        title: 'The Great Rift Valley & Mountain Formations',
-        subtitle: 'Faulting, Horst Blocks & Volcanicity',
-        gradeLevel: 'P.7',
-        subjectId: 'sst',
-        ncdcStrand: 'Physical Features & Environment',
-        xpReward: 35,
-        gemsReward: 10,
-        type: 'lesson',
-        teachSlides: [
-          {
-            id: 'ts1',
-            title: 'Concept 1: How the Rift Valley Formed',
-            conceptHeading: 'Tensional & Compressional Faulting Forces',
-            body: 'The Great East African Rift Valley is a continuous geographic trench spanning from Jordan/Red Sea down to Mozambique. In Uganda, we lie in the **Western Arm of the Rift Valley**, which contains Lakes Albert, Edward, and George.\n\nIt was formed through tectonic faulting: tensional forces pulled the earth crust apart, creating parallel fault lines, and the central block sank to form the graben (valley floor).',
-            bullets: [
-              'Western Arm: Contains Lake Albert, Lake Edward, Lake George, and Lake Tanganyika.',
-              'Eastern Arm: Passes through Kenya (Lake Turkana, Lake Nakuru, Lake Naivasha).',
-              'The floor of the rift valley is hot, dry, and flat, while the escarpments (walls) are steep.',
-            ],
-            visualType: 'rift_valley_diagram',
-            pleExamTip: 'UNEB Trick Question: Lake Victoria is NOT in the Rift Valley! Lake Victoria is a downwarped depression lake between the two rift arms.',
-            realLifeUgandaExample: 'Traveling down from Fort Portal or Kabale towards Queen Elizabeth National Park takes you down steep rift valley escarpments.',
-            quickCheck: {
-              prompt: 'Which arm of the East African Rift Valley passes through western Uganda?',
-              options: ['The Eastern Arm', 'The Western Arm', 'The Ethiopian Arm', 'The Central Arm'],
-              correctIndex: 1,
-              explanation: 'Western Uganda sits directly in the Western Arm of the Rift Valley containing Lakes Albert and Edward.',
-            },
-          },
-          {
-            id: 'ts2',
-            title: 'Concept 2: Block (Horst) vs Volcanic Mountains',
-            conceptHeading: 'Why Mount Rwenzori is Unique in East Africa',
-            body: 'Mountains in Uganda were formed through two main processes: faulting (horst blocks) and volcanicity.\n\n**Mount Rwenzori (Mountains of the Moon)** is a **Block or Horst Mountain**, NOT a volcano! It was pushed upward between fault lines by compressional forces. Its highest snow-capped peak is Margherita (5,109 meters).\n\nIn contrast, **Mount Elgon (Masaba)**, **Mount Moroto**, and **Mount Muhavura** are **Volcanic Mountains** formed by molten magma erupting through vents.',
-            bullets: [
-              'Rwenzori = Block (Horst) Mountain • Margherita Peak (5,109m) • Non-volcanic.',
-              'Mount Elgon = Volcanic mountain • Wagagai Peak (4,321m) • Has the largest caldera in East Africa.',
-              'Volcanic soils (lava ash) are rich in minerals and support Arabica coffee in Mbale/Kapchorwa.',
-            ],
-            visualType: 'rift_valley_diagram',
-            pleExamTip: 'PLE High-Frequency Fact: Margherita peak on Rwenzori has permanent snow despite being near the equator because of very high altitude (temperature drops 6.5°C per 1,000m gained).',
-            realLifeUgandaExample: 'The rich Arabica coffee grown in Mbale by the Bagisu flourishes on the fertile volcanic slopes of Mount Elgon.',
-            quickCheck: {
-              prompt: 'How was Mount Rwenzori formed?',
-              options: ['Volcanic lava eruption', 'Faulting / Upward compression of a block (Horst)', 'Wind deposition', 'Downwarping of crust'],
-              correctIndex: 1,
-              explanation: 'Rwenzori is a block (horst) mountain formed by faulting, not volcanic activity.',
-            },
-          },
-        ],
-        questions: [
-          {
-            id: 'sst1_q1',
-            type: 'multiple_choice',
-            prompt: 'Which of the following mountains in Uganda was formed as a Horst (Block) mountain rather than through volcanicity?',
-            explanation: 'Mount Rwenzori was pushed up between fault lines (Horst block), while Elgon and Muhavura are volcanic.',
-            ncdcTopic: 'Mountain Formations',
-            ugandanContext: 'Mount Rwenzori Margherita Peak in Kasese',
-            options: [
-              { id: 'a', text: 'Mount Elgon' },
-              { id: 'b', text: 'Mount Rwenzori', sublabel: 'Correct! (Horst / Block Mountain)' },
-              { id: 'c', text: 'Mount Muhavura' },
-              { id: 'd', text: 'Mount Moroto' },
-            ],
-            correctOptionId: 'b',
-          },
-          {
-            id: 'sst1_q2',
-            type: 'drag_drop_match',
-            prompt: 'Match each Ugandan mountain to its highest peak according to the NCDC syllabus:',
-            explanation: 'Rwenzori -> Margherita Peak (5,109m), Mount Elgon -> Wagagai Peak (4,321m), Muhavura -> 4,127m.',
-            ncdcTopic: 'Ugandan Peaks & Geography',
-            pairs: [
-              { id: 'p1', left: 'Mount Rwenzori', right: 'Margherita Peak (5,109m)' },
-              { id: 'p2', left: 'Mount Elgon', right: 'Wagagai Peak (4,321m)' },
-              { id: 'p3', left: 'Mount Moroto', right: 'Sokodek Peak' },
-            ],
-          },
-          {
-            id: 'sst1_q3',
-            type: 'sentence_unscramble',
-            prompt: 'Arrange the scientific reason why Mount Rwenzori has permanent snow near the equator:',
-            subtext: 'PLE standard explanation rule...',
-            explanation: 'Very high altitude causes temperature to drop below freezing point at the peak.',
-            ncdcTopic: 'Altitude and Climate',
-            scrambledWords: ['very', 'high', 'altitude', 'causes', 'freezing', 'temperatures', 'at', 'the', 'peak'],
-            correctSentence: 'very high altitude causes freezing temperatures at the peak',
-          },
-        ],
-      },
-      {
-        id: 'sst-p7-l2',
-        unitId: 'sst-p7-u1',
-        title: 'Drainage: The Nile Basin & Uganda Lake Systems',
-        subtitle: 'From Lake Victoria to the Mediterranean Sea',
-        gradeLevel: 'P.7',
-        subjectId: 'sst',
-        ncdcStrand: 'Drainage Systems of Africa',
-        xpReward: 40,
-        gemsReward: 12,
-        type: 'lesson',
-        teachSlides: [
-          {
-            id: 'ts_drain1',
-            title: 'Concept 1: Types of Lakes in Uganda',
-            conceptHeading: 'Downwarped Lakes vs Rift Valley Lakes',
-            body: 'Lakes in Uganda are classified by how their basins formed:\n\n1. **Downwarped / Depression Lakes (e.g. Lake Victoria & Lake Kyoga)**: Formed when the central plateau of East Africa sagged down due to crustal warping. They are characteristically wide, shallow, have fresh water, and irregular indented shorelines.\n\n2. **Rift Valley / Fault Lakes (e.g. Lake Albert, Lake Edward, Lake Tanganyika)**: Formed in deep grabens on the rift valley floor. They are long, narrow, very deep, with steep cliff banks.\n\n3. **Crater Lakes (e.g. Lake Katwe, Lake Bunyonyi caldera)**: Formed when extinct volcanic craters filled with rainwater.',
-            bullets: [
-              'Lake Victoria (Nalubaale): Largest freshwater lake in Africa (shared by Uganda 45%, Tanzania 49%, Kenya 6%).',
-              'Lake Kyoga: Very shallow, surrounded by extensive papyrus swamps that filter the Victoria Nile.',
-              'Lake Katwe: Salt lake formed in an explosion crater in Kasese.',
-            ],
-            visualType: 'nile_drainage_map',
-            pleExamTip: 'PLE Common Question: Why is Lake Kyoga swampy and shallow? Because it is a downwarped basin choked by silting and floating suds (papyrus).',
-            realLifeUgandaExample: 'Fish like Nile Perch (Mputa) and Tilapia (Ngege) caught in Lake Victoria supply local markets across Kampala and Jinja.',
-            quickCheck: {
-              prompt: 'How was Lake Victoria (Nalubaale) formed?',
-              options: ['Rift valley faulting', 'Crustal downwarping / depression', 'Volcanic lava damming', 'Meteorite impact'],
-              correctIndex: 1,
-              explanation: 'Lake Victoria was formed by crustal downwarping between the two rift valley arms.',
-            },
-          },
-          {
-            id: 'ts_drain2',
-            title: 'Concept 2: The Course of the River Nile',
-            conceptHeading: 'From Ripon Falls in Jinja to the Delta in Egypt',
-            body: 'The River Nile is the longest river in Africa (~6,650 km). In Uganda, it follows a historic journey:\n\n1. **Starts at Jinja** (Source of the Nile on Lake Victoria).\n2. **Victoria Nile**: Flows through Nalubaale and Kiira dams, Bujagali, Isimba, Karuma Falls, and into Lake Kyoga.\n3. **Murchison Falls**: Drops 43 meters through a narrow 7-meter rock gorge into Lake Albert.\n4. **Albert Nile**: Exits Lake Albert flowing northward past Pakwach and Nimule into South Sudan.\n5. **White Nile**: Continues to Khartoum where it meets the Blue Nile from Lake Tana in Ethiopia.',
-            bullets: [
-              'Major Hydroelectric Dams: Nalubaale (Owen Falls), Kiira, Bujagali, Isimba, Karuma.',
-              'Economic value: Generates electricity for industries, supports fishing, tourism, and irrigation.',
-            ],
-            visualType: 'nile_drainage_map',
-            pleExamTip: 'UNEB Landmark Question: John Hanning Speke was the first European explorer to reach the source of the Nile in Jinja in 1862.',
-            realLifeUgandaExample: 'The electricity powering homes across Uganda is generated by the force of the flowing Nile at Nalubaale, Bujagali, and Karuma dams.',
-            quickCheck: {
-              prompt: 'Where does the River Nile exit Lake Victoria in Uganda?',
-              options: ['Pakwach', 'Jinja', 'Entebbe', 'Masaka'],
-              correctIndex: 1,
-              explanation: 'The River Nile begins its journey out of Lake Victoria at Jinja.',
-            },
-          },
-        ],
-        questions: [
-          {
-            id: 'sst2_q1',
-            type: 'multiple_choice',
-            prompt: 'Which type of lake is Lake Victoria (Nalubaale) classified under according to the NCDC syllabus?',
-            explanation: 'Lake Victoria is a downwarped/depression lake formed by crustal sagging, unlike rift valley fault lakes.',
-            ncdcTopic: 'Lake Formations in Uganda',
-            ugandanContext: 'Lake Victoria fisheries & water supply',
-            options: [
-              { id: 'a', text: 'Crater Lake' },
-              { id: 'b', text: 'Downwarped / Depression Lake', sublabel: 'Correct! Formed by crustal sagging' },
-              { id: 'c', text: 'Glacial Tarn' },
-              { id: 'd', text: 'Rift Valley Fault Lake' },
-            ],
-            correctOptionId: 'b',
-          },
-          {
-            id: 'sst2_q2',
-            type: 'sentence_unscramble',
-            prompt: 'Order the journey of the Nile water through Uganda from source to northern exit:',
-            subtext: 'Trace the flow path...',
-            explanation: 'The Nile flows from Jinja into Lake Kyoga, then into Lake Albert, and exits through Pakwach as the Albert Nile.',
-            ncdcTopic: 'Nile River Flow Path',
-            scrambledWords: ['Jinja', 'Lake', 'Kyoga', 'Karuma', 'Lake', 'Albert', 'Pakwach'],
-            correctSentence: 'Jinja Lake Kyoga Karuma Lake Albert Pakwach',
-          },
-          {
-            id: 'sst2_q3',
-            type: 'drag_drop_match',
-            prompt: 'Match each Ugandan lake to its distinct economic activity or feature:',
-            explanation: 'Katwe -> Salt mining, Victoria -> Commercial fishing & transport, Bunyonyi -> Bilharzia-free tourism.',
-            ncdcTopic: 'Lakes Economic Activities',
-            pairs: [
-              { id: 'p1', left: 'Lake Katwe', right: 'Traditional salt extraction' },
-              { id: 'p2', left: 'Lake Victoria', right: 'Major Nile Perch & Tilapia fishing' },
-              { id: 'p3', left: 'Lake Bunyonyi', right: 'Deep scenic island tourism' },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'sst-p7-l3',
-        unitId: 'sst-p7-u1',
-        title: 'Climate Zones & The Rain Shadow Effect',
-        subtitle: 'Orographic Rainfall, Vegetation & Human Settlement',
-        gradeLevel: 'P.7',
-        subjectId: 'sst',
-        ncdcStrand: 'Climatic Zones of East Africa',
-        xpReward: 35,
-        gemsReward: 10,
-        type: 'lesson',
-        teachSlides: [
-          {
-            id: 'ts_clim1',
-            title: 'Concept 1: Relief (Orographic) Rainfall',
-            conceptHeading: 'Windward vs Leeward (Rain Shadow) Sides',
-            body: 'When warm, moist winds blow from Lake Victoria towards highlands like Mount Rwenzori or Mount Elgon, they are forced to rise.\n\nAs the air rises, it cools, condenses, and forms cumulus clouds, releasing heavy **relief rainfall on the Windward side**.\n\nAfter crossing the mountain peak, the now dry air descends on the **Leeward (Rain Shadow) side**, bringing dry conditions and less rainfall (e.g. Kasese plains on Rwenzori’s lee or Karamoja semi-arid areas).',
-            bullets: [
-              'Windward side: Faces incoming moist winds • Receives heavy relief rainfall • Rich vegetation & dense population.',
-              'Leeward (Rain Shadow) side: Sheltered from rain • Dry descending winds • Pastoral grazing land.',
-            ],
-            visualType: 'rift_valley_diagram',
-            pleExamTip: 'PLE Exam Keyword: Remember the two factors: Windward receives heavy relief rain; Leeward receives dry descending winds creating a rain shadow.',
-            realLifeUgandaExample: 'The slopes of Bundibugyo and Kigezi receive abundant rainfall due to relief winds, whereas the lower Kasese flats are much drier.',
-            quickCheck: {
-              prompt: 'What happens to moist air when it meets a high mountain barrier like Mount Elgon?',
-              options: ['It heats up and disappears', 'It rises, cools, condenses, and forms relief rain', 'It turns into snow instantly at the base', 'It flows backwards to the ocean'],
-              correctIndex: 1,
-              explanation: 'Moist air rises against the mountain slope, cools, condenses, and produces relief rainfall on the windward side.',
-            },
-          },
-        ],
-        questions: [
-          {
-            id: 'sst3_q1',
-            type: 'multiple_choice',
-            prompt: 'Why does the windward side of Mount Elgon receive more rainfall than the leeward side?',
-            explanation: 'Moist winds rise up the windward slope, cool and condense into clouds, leaving the descending leeward air dry.',
-            ncdcTopic: 'Relief Rainfall Mechanics',
-            options: [
-              { id: 'a', text: 'It is closer to the equator' },
-              { id: 'b', text: 'Rising moist winds cool and condense on the windward slope', sublabel: 'Correct! Creates heavy relief rainfall' },
-              { id: 'c', text: 'It has more lakes than the leeward side' },
-              { id: 'd', text: 'The sun shines stronger on the leeward side' },
-            ],
-            correctOptionId: 'b',
-          },
-        ],
-      },
-      {
-        id: 'sst-p7-chk1',
-        unitId: 'sst-p7-u1',
-        title: 'PLE Checkpoint: Geography & Drainage Sprint',
-        subtitle: 'High-Yield UNEB Examination Simulator',
-        gradeLevel: 'P.7',
-        subjectId: 'sst',
-        ncdcStrand: 'PLE Comprehensive Synthesis',
-        xpReward: 50,
-        gemsReward: 20,
-        type: 'checkpoint',
-        questions: [
-          {
-            id: 'chk1_q1',
-            type: 'multiple_choice',
-            prompt: 'Which European explorer was the first to see and name the source of the River Nile at Ripon Falls in Jinja in 1862?',
-            explanation: 'John Hanning Speke reached Ripon Falls on 28th July 1862 and confirmed Lake Victoria as the source of the Nile.',
-            ncdcTopic: 'Exploration of East Africa',
-            options: [
-              { id: 'a', text: 'Henry Morton Stanley' },
-              { id: 'b', text: 'John Hanning Speke', sublabel: 'Correct! Reached Jinja in 1862' },
-              { id: 'c', text: 'Sir Samuel Baker' },
-              { id: 'd', text: 'David Livingstone' },
-            ],
-            correctOptionId: 'b',
-          },
-          {
-            id: 'chk1_q2',
-            type: 'drag_drop_match',
-            prompt: 'Match each feature to its geographic formation in East Africa:',
-            explanation: 'Rwenzori -> Faulting, Lake Victoria -> Downwarping, Elgon -> Volcanicity.',
-            ncdcTopic: 'Physical Formations Synthesis',
-            pairs: [
-              { id: 'p1', left: 'Lake Victoria', right: 'Downwarped Central Plateau' },
-              { id: 'p2', left: 'Mount Rwenzori', right: 'Horst Block between Faults' },
-              { id: 'p3', left: 'Mount Elgon', right: 'Extinct Volcanic Cone' },
-            ],
-          },
-        ],
-      },
-    ],
-  },
+  TOPIC_1_EAST_AFRICA,
 
   // =========================================================================
-  // UNIT 2: THE PEOPLE OF EAST AFRICA & PRE-COLONIAL KINGDOMS
+  // PRIMARY 7 SOCIAL STUDIES (SST) - NCDC TOPIC 2: CLIMATE AND VEGETATION OF EAST AFRICA
+  // =========================================================================
+  TOPIC_2_CLIMATE_VEGETATION,
+
+  // =========================================================================
+  // PRIMARY 7 SOCIAL STUDIES (SST) - NCDC TOPIC 3: RIVERS AND LAKES OF EAST AFRICA (DRAINAGE SYSTEMS)
+  // =========================================================================
+  TOPIC_3_RIVERS_LAKES,
+
+  // =========================================================================
+  // PRIMARY 7 SOCIAL STUDIES (SST) - NCDC TOPIC 4: POPULATION AND SETTLEMENT IN EAST AFRICA
+  // =========================================================================
+  TOPIC_4_POPULATION_SETTLEMENT,
+
+  // =========================================================================
+  // UNIT 5: THE PEOPLE OF EAST AFRICA & PRE-COLONIAL KINGDOMS
   // =========================================================================
   {
-    id: 'sst-p7-u2',
-    unitNumber: 2,
+    id: 'sst-p7-u5',
+    unitNumber: 5,
     title: 'The People of East Africa & Early Migrations',
-    term: 1,
+    term: 2,
     gradeLevel: 'P.7',
     subjectId: 'sst',
     description: 'Learn the migration routes of the Bantu, River-Lake Nilotes, Highland Nilotes, and Cushites, followed by the great Bachwezi civilization and centralized kingdom formations.',
@@ -352,8 +84,8 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
     accentColor: '#ff9600',
     lessons: [
       {
-        id: 'sst-p7-l4',
-        unitId: 'sst-p7-u2',
+        id: 'sst-p7-u5-l1',
+        unitId: 'sst-p7-u5',
         title: 'Major Ethnic Groups & Migration Origins',
         subtitle: 'Bantu, Nilotes, Cushites & Sudanic Peoples',
         gradeLevel: 'P.7',
@@ -434,8 +166,8 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
         ],
       },
       {
-        id: 'sst-p7-l5',
-        unitId: 'sst-p7-u2',
+        id: 'sst-p7-u5-l2',
+        unitId: 'sst-p7-u5',
         title: 'Pre-Colonial Kingdoms & The Chwezi Civilization',
         subtitle: 'The Empire of Bunyoro-Kitara, Buganda & Ankole',
         gradeLevel: 'P.7',
@@ -486,11 +218,11 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
   },
 
   // =========================================================================
-  // UNIT 3: FOREIGN INFLUENCE & THE ROAD TO INDEPENDENCE (1962)
+  // UNIT 6: FOREIGN INFLUENCE & THE ROAD TO INDEPENDENCE (1962)
   // =========================================================================
   {
-    id: 'sst-p7-u3',
-    unitNumber: 3,
+    id: 'sst-p7-u6',
+    unitNumber: 6,
     title: 'Foreign Influence, The 1900 Buganda Agreement & Independence',
     term: 2,
     gradeLevel: 'P.7',
@@ -501,8 +233,8 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
     accentColor: '#22c55e',
     lessons: [
       {
-        id: 'sst-p7-l6',
-        unitId: 'sst-p7-u3',
+        id: 'sst-p7-u6-l1',
+        unitId: 'sst-p7-u6',
         title: 'The 1900 Buganda Agreement',
         subtitle: 'Sir Harry Johnston, Land Division & Colonial Taxes',
         gradeLevel: 'P.7',
@@ -563,8 +295,8 @@ export const CURRICULUM_UNITS: CurriculumUnit[] = [
         ],
       },
       {
-        id: 'sst-p7-l7',
-        unitId: 'sst-p7-u3',
+        id: 'sst-p7-u6-l2',
+        unitId: 'sst-p7-u6',
         title: 'The Road to Independence (9th October 1962)',
         subtitle: 'National Heroes, Parties & National Symbols',
         gradeLevel: 'P.7',
